@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SysMedic | Intelligent Repair Core</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div class="app-container">
+    
+    <aside class="sidebar">
+        <div class="brand">
+            <i class="fa-solid fa-biohazard"></i> SysMedic
+        </div>
+        
+        <nav class="nav-menu">
+            <button class="nav-item active" onclick="switchTab('dashboard')">
+                <i class="fa-solid fa-chart-line"></i> Dashboard
+            </button>
+            <button class="nav-item" onclick="switchTab('chat')">
+                <i class="fa-solid fa-robot"></i> AI Architect
+            </button>
+            <button class="nav-item" onclick="switchTab('logs')">
+                <i class="fa-solid fa-file-code"></i> System Logs
+            </button>
+        </nav>
+
+        <div class="system-status">
+            <div class="status-dot online"></div>
+            <span>System: ONLINE</span>
+            <div class="version">v1.0.4-Beta</div>
+        </div>
+    </aside>
+
+    <main class="content">
+
+        <section id="dashboard" class="tab-pane active">
+            <header class="top-bar">
+                <h1>System Health Overview</h1>
+                <div class="user-badge">Admin Access Granted</div>
+            </header>
+
+            <div class="hero-section">
+                <div class="heal-circle-container">
+                    <button id="heal-btn" onclick="triggerHeal()">
+                        <i class="fa-solid fa-power-off"></i>
+                        <span>INITIATE REPAIR</span>
+                    </button>
+                    <div class="pulse-ring"></div>
+                </div>
+
+                <div class="terminal-window" id="terminal-window">
+                    <div class="terminal-header">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                        <span class="title">SysMedic_Core.exe</span>
+                    </div>
+                    <div class="terminal-body" id="terminal-logs">
+                        <div class="log-line">Waiting for command input...</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="chat" class="tab-pane hidden">
+            <header class="top-bar">
+                <h1>Polyglot AI Assistant</h1>
+            </header>
+            <div class="chat-wrapper">
+                <div class="chat-placeholder">
+                    <i class="fa-solid fa-comments"></i>
+                    <p>AI Interface Loading...</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+<script>
+    // --- UI LOGIC ONLY (No Backend yet) ---
+    
+    function switchTab(tabId) {
+        // Hide all tabs
+        document.querySelectorAll('.tab-pane').forEach(el => {
+            el.classList.remove('active');
+            el.classList.add('hidden');
+        });
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+        // Show selected tab
+        document.getElementById(tabId).classList.remove('hidden');
+        document.getElementById(tabId).classList.add('active');
+        
+        // Highlight Sidebar (This is a simplified way, normally use IDs)
+        event.currentTarget.classList.add('active');
+    }
+
+    function triggerHeal() {
+        const btn = document.getElementById('heal-btn');
+        const terminal = document.getElementById('terminal-logs');
+        
+        // 1. Visual Feedback
+        btn.classList.add('healing');
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i><span>SCANNING</span>';
+        
+        // 2. Mock Terminal Logs (Simulating Dev B's work)
+        addLog("> Initializing System Restore Point...");
+        
+        setTimeout(() => addLog("> Checking Network Adapter [Intel Wi-Fi 6 AX201]..."), 1000);
+        setTimeout(() => addLog("> Flushing DNS Cache... SUCCESS"), 2500);
+        setTimeout(() => addLog("> Restarting Audio Services... SUCCESS"), 4000);
+        setTimeout(() => {
+            addLog("> SYSTEM OPTIMIZED.");
+            btn.classList.remove('healing');
+            btn.innerHTML = '<i class="fa-solid fa-check"></i><span>FIXED</span>';
+            btn.style.borderColor = "#4fffa8";
+        }, 5500);
+    }
+
+    function addLog(text) {
+        const terminal = document.getElementById('terminal-logs');
+        const line = document.createElement('div');
+        line.className = 'log-line';
+        line.innerText = text;
+        terminal.appendChild(line);
+        terminal.scrollTop = terminal.scrollHeight; // Auto-scroll
+    }
+</script>
+
+</body>
+</html>
