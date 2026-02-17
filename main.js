@@ -10,7 +10,7 @@ function createWindow() {
         }
     });
     win.loadFile('index.html');
-    // win.setMenuBarVisibility(false); // Uncomment to hide menu later
+    win.setMenuBarVisibility(false); // Uncomment to hide menu later
 }
 
 app.whenReady().then(createWindow);

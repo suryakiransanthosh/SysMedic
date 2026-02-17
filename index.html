@@ -10,57 +10,111 @@
 <body>
 
 <div class="app-container">
-    
-    <aside class="sidebar">
-        <div class="brand">
-            <i class="fa-solid fa-biohazard"></i> SysMedic
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <button class="toggle-btn" onclick="toggleSidebar()">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="brand">
+                <i class="fa-solid fa-biohazard logo-icon"></i>
+                <span class="brand-text">SysMedic</span>
+            </div>
         </div>
         
         <nav class="nav-menu">
             <button class="nav-item active" onclick="switchTab('dashboard')">
-                <i class="fa-solid fa-chart-line"></i> Dashboard
+                <i class="fa-solid fa-house"></i>
+                <span class="nav-text">Home</span>
             </button>
             <button class="nav-item" onclick="switchTab('chat')">
-                <i class="fa-solid fa-robot"></i> AI Architect
+                <i class="fa-solid fa-comments-dollar"></i>
+                <span class="nav-text">AI Chat</span>
             </button>
-            <button class="nav-item" onclick="switchTab('logs')">
-                <i class="fa-solid fa-file-code"></i> System Logs
+            <button class="nav-item" onclick="showPlaceholder('Customer Support Ticket Generation')">
+                <i class="fa-solid fa-headset"></i>
+                <span class="nav-text">Customer Support</span>
+            </button>
+            <button class="nav-item" onclick="showPlaceholder('Info about PC')">
+                <i class="fa-solid fa-circle-info"></i>
+                <span class="nav-text">Info about PC</span>
+            </button>
+            <div class="spacer"></div>
+            <button class="nav-item" onclick="showPlaceholder('Settings')">
+                <i class="fa-solid fa-gear"></i>
+                <span class="nav-text">Settings</span>
+            </button>
+            <button class="nav-item" onclick="showPlaceholder('Account Management')">
+                <i class="fa-solid fa-user-circle"></i>
+                <span class="nav-text">Account</span>
             </button>
         </nav>
-
-        <div class="system-status">
-            <div class="status-dot online"></div>
-            <span>System: ONLINE</span>
-            <div class="version">v1.0.4-Beta</div>
-        </div>
     </aside>
 
     <main class="content">
 
         <section id="dashboard" class="tab-pane active">
             <header class="top-bar">
-                <h1>System Health Overview</h1>
+                <div>
+                    <h1>System Dashboard</h1>
+                    <p class="subtitle">Real-time health monitoring</p>
+                </div>
                 <div class="user-badge">Admin Access Granted</div>
             </header>
 
-            <div class="hero-section">
+            <div class="vitals-grid">
+                <div class="vital-card">
+                    <i class="fa-solid fa-microchip icon-cpu"></i>
+                    <div class="vital-info">
+                        <span class="vital-label">CPU Load</span>
+                        <span class="vital-value" id="cpu-val">12%</span>
+                    </div>
+                </div>
+                <div class="vital-card">
+                    <i class="fa-solid fa-memory icon-ram"></i>
+                    <div class="vital-info">
+                        <span class="vital-label">Memory Usage</span>
+                        <span class="vital-value" id="ram-val">4.2 / 16 GB</span>
+                    </div>
+                </div>
+                <div class="vital-card">
+                    <i class="fa-solid fa-dumpster icon-disk"></i>
+                    <div class="vital-info">
+                        <span class="vital-label">Temp & Junk Files</span>
+                        <span class="vital-value warning" id="temp-val">2.4 GB</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-section">
                 <div class="heal-circle-container">
                     <button id="heal-btn" onclick="triggerHeal()">
                         <i class="fa-solid fa-power-off"></i>
-                        <span>INITIATE REPAIR</span>
+                        <span>INITIATE SCAN</span>
                     </button>
                     <div class="pulse-ring"></div>
                 </div>
 
-                <div class="terminal-window" id="terminal-window">
-                    <div class="terminal-header">
-                        <span class="dot red"></span>
-                        <span class="dot yellow"></span>
-                        <span class="dot green"></span>
-                        <span class="title">SysMedic_Core.exe</span>
+                <div class="scan-stages hidden" id="scan-stages">
+                    <div class="stage pending" id="stage-1">
+                        <div class="stage-icon"><i class="fa-solid fa-terminal"></i></div>
+                        <div class="stage-details">
+                            <h4>Stage 1: Basic Command Fix</h4>
+                            <p class="stage-status">Waiting...</p>
+                        </div>
                     </div>
-                    <div class="terminal-body" id="terminal-logs">
-                        <div class="log-line">Waiting for command input...</div>
+                    <div class="stage pending" id="stage-2">
+                        <div class="stage-icon"><i class="fa-solid fa-shield-virus"></i></div>
+                        <div class="stage-details">
+                            <h4>Stage 2: Windows Defender Quick Scan</h4>
+                            <p class="stage-status">Waiting...</p>
+                        </div>
+                    </div>
+                    <div class="stage pending" id="stage-3">
+                        <div class="stage-icon"><i class="fa-solid fa-rotate"></i></div>
+                        <div class="stage-details">
+                            <h4>Stage 3: OS & Driver Update Check</h4>
+                            <p class="stage-status">Waiting...</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -69,68 +123,200 @@
         <section id="chat" class="tab-pane hidden">
             <header class="top-bar">
                 <h1>Polyglot AI Assistant</h1>
+                <div class="user-badge">Language: Auto-Detect</div>
             </header>
-            <div class="chat-wrapper">
-                <div class="chat-placeholder">
-                    <i class="fa-solid fa-comments"></i>
-                    <p>AI Interface Loading...</p>
+            <div class="chat-interface">
+                <div class="chat-history" id="chat-history">
+                    <div class="message bot">
+                        <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+                        <div class="bubble">Hello! I am SysMedic. How can I help you today?</div>
+                    </div>
+                </div>
+                <div class="input-area">
+                    <input type="text" id="user-input" placeholder="Describe your issue..." onkeypress="handleEnter(event)">
+                    <button onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
                 </div>
             </div>
         </section>
 
     </main>
+
+    <div id="permission-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fa-solid fa-triangle-exclamation warning-icon"></i>
+                <h2 id="modal-title">Threat Detected</h2>
+            </div>
+            <p id="modal-desc">Windows Defender found a malicious payload in your Temp folder. Do you want SysMedic to remove it safely?</p>
+            
+            <div class="modal-actions">
+                <button class="btn-ignore" onclick="handleModalChoice(false)">Ignore</button>
+                <button class="btn-resolve" onclick="handleModalChoice(true)">
+                    <i class="fa-solid fa-shield-halved"></i> Resolve Issue
+                </button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>
-    // --- UI LOGIC ONLY (No Backend yet) ---
-    
-    function switchTab(tabId) {
-        // Hide all tabs
-        document.querySelectorAll('.tab-pane').forEach(el => {
-            el.classList.remove('active');
-            el.classList.add('hidden');
-        });
-        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    // --- SIDEBAR TOGGLE LOGIC ---
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('expanded');
+    }
 
-        // Show selected tab
+    // --- TAB SWITCHING LOGIC ---
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+        document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         document.getElementById(tabId).classList.remove('hidden');
-        document.getElementById(tabId).classList.add('active');
-        
-        // Highlight Sidebar (This is a simplified way, normally use IDs)
         event.currentTarget.classList.add('active');
     }
 
+    function showPlaceholder(feature) {
+        alert(`${feature} feature coming soon!`);
+    }
+
+    // --- CHAT LOGIC ---
+    function handleEnter(e) { if (e.key === 'Enter') sendMessage(); }
+    function sendMessage() {
+        const input = document.getElementById('user-input');
+        if (input.value.trim() === "") return;
+        addMessage(input.value, 'user');
+        input.value = "";
+        setTimeout(() => addMessage("I'm analyzing your request...", 'bot'), 1000);
+    }
+    function addMessage(text, sender) {
+        const history = document.getElementById('chat-history');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${sender}`;
+        const icon = sender === 'bot' ? '<i class="fa-solid fa-robot"></i>' : '<i class="fa-solid fa-user"></i>';
+        msgDiv.innerHTML = `<div class="avatar">${icon}</div><div class="bubble">${text}</div>`;
+        history.appendChild(msgDiv);
+        history.scrollTop = history.scrollHeight;
+    }
+
+    // --- HEAL LOGIC & STAGES ---
+    let scanPausedAtStage = 0; 
+
     function triggerHeal() {
         const btn = document.getElementById('heal-btn');
-        const terminal = document.getElementById('terminal-logs');
+        document.getElementById('scan-stages').classList.remove('hidden');
         
-        // 1. Visual Feedback
         btn.classList.add('healing');
         btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i><span>SCANNING</span>';
-        
-        // 2. Mock Terminal Logs (Simulating Dev B's work)
-        addLog("> Initializing System Restore Point...");
-        
-        setTimeout(() => addLog("> Checking Network Adapter [Intel Wi-Fi 6 AX201]..."), 1000);
-        setTimeout(() => addLog("> Flushing DNS Cache... SUCCESS"), 2500);
-        setTimeout(() => addLog("> Restarting Audio Services... SUCCESS"), 4000);
+        btn.disabled = true; 
+
+        for(let i=1; i<=3; i++) updateStageUI(i, 'Waiting...', 'pending');
+
+        // Stage 1: Basic Fix
+        setTimeout(() => updateStageUI(1, 'Executing network and audio fixes...', 'active'), 500);
+        setTimeout(() => updateStageUI(1, 'Resolved successfully', 'completed'), 2500);
+
+        // Stage 2: Virus Scan (Triggers 1st Modal)
         setTimeout(() => {
-            addLog("> SYSTEM OPTIMIZED.");
-            btn.classList.remove('healing');
-            btn.innerHTML = '<i class="fa-solid fa-check"></i><span>FIXED</span>';
-            btn.style.borderColor = "#4fffa8";
-        }, 5500);
+            updateStageUI(2, 'Scanning files...', 'active');
+            setTimeout(() => {
+                updateStageUI(2, 'ACTION REQUIRED: Threat found!', 'warning');
+                scanPausedAtStage = 2; 
+                showModal("Threat Detected", "Windows Defender found a malicious payload. Do you want SysMedic to quarantine it?");
+            }, 2000);
+        }, 3000);
     }
 
-    function addLog(text) {
-        const terminal = document.getElementById('terminal-logs');
-        const line = document.createElement('div');
-        line.className = 'log-line';
-        line.innerText = text;
-        terminal.appendChild(line);
-        terminal.scrollTop = terminal.scrollHeight; // Auto-scroll
+    // --- MODAL LOGIC ---
+    function showModal(title, desc) {
+        document.getElementById('modal-title').innerText = title;
+        document.getElementById('modal-desc').innerText = desc;
+        document.getElementById('permission-modal').classList.remove('hidden');
+    }
+
+    function handleModalChoice(isApproved) {
+        document.getElementById('permission-modal').classList.add('hidden');
+        
+        // If we paused at Stage 2 (Virus Scan)
+        if (scanPausedAtStage === 2) {
+            if (isApproved) {
+                updateStageUI(2, 'Quarantining threat...', 'active');
+                setTimeout(() => {
+                    updateStageUI(2, 'Threat removed successfully', 'completed');
+                    resumeScanToStage3();
+                }, 1500);
+            } else {
+                updateStageUI(2, 'Ignored by user', 'completed');
+                resumeScanToStage3();
+            }
+        } 
+        // If we paused at Stage 3 (Updates)
+        else if (scanPausedAtStage === 3) {
+            if (isApproved) {
+                updateStageUI(3, 'Downloading and installing updates...', 'active');
+                setTimeout(() => {
+                    updateStageUI(3, 'System is up to date', 'completed');
+                    finishScan();
+                }, 2500);
+            } else {
+                updateStageUI(3, 'Update skipped by user', 'completed');
+                finishScan();
+            }
+        }
+    }
+
+    // Stage 3: Updates (Triggers 2nd Modal)
+    function resumeScanToStage3() {
+        setTimeout(() => {
+            updateStageUI(3, 'Checking for updates...', 'active');
+            
+            setTimeout(() => {
+                updateStageUI(3, 'ACTION REQUIRED: Updates available!', 'warning');
+                scanPausedAtStage = 3; 
+                showModal("System Update Available", "SysMedic found critical OS and Driver updates. Do you want to download and install them now?");
+            }, 2000);
+        }, 1000);
+    }
+
+    // Final Success State
+    function finishScan() {
+        const btn = document.getElementById('heal-btn');
+        btn.classList.remove('healing');
+        btn.innerHTML = '<i class="fa-solid fa-check"></i><span>SYSTEM HEALTHY</span>';
+        btn.style.borderColor = "#10b981"; 
+        btn.style.background = "radial-gradient(circle, #059669 0%, #064e3b 100%)";
+        
+        setTimeout(() => { 
+            btn.disabled = false; 
+            btn.style.borderColor = ""; 
+            btn.style.background = "";
+            btn.innerHTML = '<i class="fa-solid fa-power-off"></i><span>INITIATE SCAN</span>';
+        }, 5000);
+    }
+
+    function updateStageUI(stageNum, text, status) {
+        const st = document.getElementById('stage-' + stageNum);
+        st.className = `stage ${status}`;
+        st.querySelector('.stage-status').innerText = text;
+        
+        const iconContainer = st.querySelector('.stage-icon');
+        if(status === 'completed') {
+            iconContainer.innerHTML = '<i class="fa-solid fa-check"></i>';
+            st.style.borderColor = ""; // Remove yellow warning border
+        } 
+        else if (status === 'active') {
+            iconContainer.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+            st.style.borderColor = ""; 
+        } 
+        else if (status === 'warning') {
+            iconContainer.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            st.style.borderColor = "#facc15"; 
+            iconContainer.style.background = "#facc15";
+            iconContainer.style.color = "#000";
+        } 
+        else if (status === 'pending') {
+            const icons = ['fa-terminal', 'fa-shield-virus', 'fa-rotate'];
+            iconContainer.innerHTML = `<i class="fa-solid ${icons[stageNum-1]}"></i>`;
+        }
     }
 </script>
-
 </body>
 </html>
