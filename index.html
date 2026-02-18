@@ -66,21 +66,21 @@
                     <i class="fa-solid fa-microchip icon-cpu"></i>
                     <div class="vital-info">
                         <span class="vital-label">CPU Load</span>
-                        <span class="vital-value" id="cpu-val">12%</span>
+                        <span class="vital-value" id="cpu-val">0%</span>
                     </div>
                 </div>
                 <div class="vital-card">
                     <i class="fa-solid fa-memory icon-ram"></i>
                     <div class="vital-info">
                         <span class="vital-label">Memory Usage</span>
-                        <span class="vital-value" id="ram-val">4.2 / 16 GB</span>
+                        <span class="vital-value" id="ram-val">0 / 0 GB</span>
                     </div>
                 </div>
                 <div class="vital-card">
                     <i class="fa-solid fa-dumpster icon-disk"></i>
                     <div class="vital-info">
                         <span class="vital-label">Temp & Junk Files</span>
-                        <span class="vital-value warning" id="temp-val">2.4 GB</span>
+                        <span class="vital-value warning" id="temp-val">0 GB</span>
                     </div>
                 </div>
             </div>
@@ -145,9 +145,12 @@
         <div class="modal-content">
             <div class="modal-header">
                 <i class="fa-solid fa-triangle-exclamation warning-icon"></i>
-                <h2 id="modal-title">Threat Detected</h2>
+                <h2 id="modal-title">Action Required</h2>
             </div>
-            <p id="modal-desc">Windows Defender found a malicious payload in your Temp folder. Do you want SysMedic to remove it safely?</p>
+            <p id="modal-desc" style="white-space: pre-wrap;"></p>
+            
+            <div id="update-checklist" class="hidden" style="text-align: left; margin-bottom: 25px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+            </div>
             
             <div class="modal-actions">
                 <button class="btn-ignore" onclick="handleModalChoice(false)">Ignore</button>
@@ -161,22 +164,18 @@
 </div>
 
 <script>
-
     const { ipcRenderer } = require('electron');
+
     // --- DASHBOARD VITALS LOGIC ---
-    
-    // 1. Ask the backend for stats every 2 seconds
     setInterval(() => {
         ipcRenderer.send('request-vitals');
     }, 2000);
 
-    // 2. Listen for the backend's response and update the screen
     ipcRenderer.on('vitals-update', (event, data) => {
         document.getElementById('cpu-val').innerText = data.cpu;
         document.getElementById('ram-val').innerText = data.ram;
         document.getElementById('temp-val').innerText = data.temp;
 
-        // Visual flair: turn CPU text red if it goes over 80%
         const cpuNum = parseInt(data.cpu);
         if (cpuNum > 80) {
             document.getElementById('cpu-val').classList.add('warning');
@@ -190,7 +189,6 @@
         document.getElementById('sidebar').classList.toggle('expanded');
     }
 
-    // --- TAB SWITCHING LOGIC ---
     function switchTab(tabId) {
         document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -221,7 +219,7 @@
         history.scrollTop = history.scrollHeight;
     }
 
-    // --- HEAL LOGIC & STAGES (Connected to Backend) ---
+// --- HEAL LOGIC & STAGES (Connected to Backend) ---
     let scanPausedAtStage = 0; 
 
     function triggerHeal() {
@@ -234,25 +232,76 @@
 
         for(let i=1; i<=3; i++) updateStageUI(i, 'Waiting...', 'pending');
 
-        // Start Stage 1
-        updateStageUI(1, 'Executing network and audio fixes...', 'active');
-        ipcRenderer.send('start-stage-1'); // TELL BACKEND TO WORK!
-    }
+        // Start Stage 1 (Text will be updated by the backend!)
+        updateStageUI(1, 'Initializing basic fixes...', 'active');
+        ipcRenderer.send('start-stage-1');
+    }    
 
-    // LISTENER: When Backend finishes Stage 1
+    // NEW LISTENER: Stage 1 Live Progress
+    ipcRenderer.on('stage-1-progress', (event, stepText) => {
+        updateStageUI(1, stepText, 'active');
+    });
+
+    // LISTENER: Stage 1 Done -> Start Stage 2
     ipcRenderer.on('stage-1-complete', (event, response) => {
-        updateStageUI(1, 'Resolved successfully', 'completed');
+        updateStageUI(1, 'All basic services restored', 'completed');
         
         // Start Stage 2
         updateStageUI(2, 'Scanning files...', 'active');
-        ipcRenderer.send('start-stage-2-scan'); // TELL BACKEND TO SCAN!
+        ipcRenderer.send('start-stage-2-scan'); 
     });
 
-    // LISTENER: When Backend finds a virus
     ipcRenderer.on('threat-detected', (event, data) => {
         updateStageUI(2, 'ACTION REQUIRED: Threat found!', 'warning');
         scanPausedAtStage = 2; 
-        showModal("Threat Detected", `Windows Defender found '${data.threatName}' in your Temp folder. Do you want SysMedic to quarantine it?`);
+        
+        showModal(
+            "Threat Detected", 
+            `Windows Defender found '${data.threatName}' at location:\n${data.threatLocation}\n\nDo you want SysMedic to quarantine it safely?`
+        );
+    });
+
+    ipcRenderer.on('scan-2-clean', (event) => {
+        updateStageUI(2, 'No threats detected', 'completed');
+        resumeScanToStage3(); 
+    });
+
+    ipcRenderer.on('threat-resolved', (event, response) => {
+        updateStageUI(2, 'Threat removed successfully', 'completed');
+        resumeScanToStage3();
+    });
+
+    function resumeScanToStage3() {
+        updateStageUI(3, 'Checking for updates...', 'active');
+        ipcRenderer.send('start-stage-3-scan');
+    }
+
+    ipcRenderer.on('updates-found', (event, data) => {
+        updateStageUI(3, 'ACTION REQUIRED: Updates available!', 'warning');
+        scanPausedAtStage = 3; 
+        
+        const checklistDiv = document.getElementById('update-checklist');
+        checklistDiv.innerHTML = '';
+        checklistDiv.classList.remove('hidden'); 
+
+        data.updates.forEach(upd => {
+            const label = document.createElement('label');
+            label.style.display = 'block';
+            label.style.marginBottom = '10px';
+            label.style.color = 'var(--text-main)';
+            label.style.fontSize = '13px';
+            label.style.cursor = 'pointer';
+            
+            label.innerHTML = `<input type="checkbox" value="${upd.id}" checked class="update-cb" style="margin-right: 10px; accent-color: var(--accent);"> ${upd.name}`;
+            checklistDiv.appendChild(label);
+        });
+
+        showModal("System Updates Available", "Please select the updates you want to install:");
+    });
+
+    ipcRenderer.on('updates-resolved', (event) => {
+        updateStageUI(3, 'System is up to date', 'completed');
+        finishScan();
     });
 
     // --- MODAL LOGIC ---
@@ -264,23 +313,29 @@
 
     function handleModalChoice(isApproved) {
         document.getElementById('permission-modal').classList.add('hidden');
+        document.getElementById('update-checklist').classList.add('hidden'); 
         
         if (scanPausedAtStage === 2) {
             if (isApproved) {
                 updateStageUI(2, 'Quarantining threat...', 'active');
-                ipcRenderer.send('resolve-threat'); // TELL BACKEND TO DELETE IT!
+                ipcRenderer.send('resolve-threat'); 
             } else {
                 updateStageUI(2, 'Ignored by user', 'completed');
                 resumeScanToStage3();
             }
         } else if (scanPausedAtStage === 3) {
-            // (Keep your existing Stage 3 logic here)
             if (isApproved) {
-                updateStageUI(3, 'Downloading and installing updates...', 'active');
-                setTimeout(() => {
-                    updateStageUI(3, 'System is up to date', 'completed');
+                const checkboxes = document.querySelectorAll('.update-cb:checked');
+                const selectedIds = Array.from(checkboxes).map(cb => cb.value);
+
+                if (selectedIds.length === 0) {
+                    updateStageUI(3, 'No updates selected', 'completed');
                     finishScan();
-                }, 2500);
+                    return;
+                }
+
+                updateStageUI(3, `Installing ${selectedIds.length} update(s)...`, 'active');
+                ipcRenderer.send('resolve-updates', selectedIds); 
             } else {
                 updateStageUI(3, 'Update skipped by user', 'completed');
                 finishScan();
@@ -288,27 +343,6 @@
         }
     }
 
-    // LISTENER: When Backend finishes deleting the virus
-    ipcRenderer.on('threat-resolved', (event, response) => {
-        updateStageUI(2, 'Threat removed successfully', 'completed');
-        resumeScanToStage3();
-    });
-    
-
-    // Stage 3: Updates (Triggers 2nd Modal)
-    function resumeScanToStage3() {
-        setTimeout(() => {
-            updateStageUI(3, 'Checking for updates...', 'active');
-            
-            setTimeout(() => {
-                updateStageUI(3, 'ACTION REQUIRED: Updates available!', 'warning');
-                scanPausedAtStage = 3; 
-                showModal("System Update Available", "SysMedic found critical OS and Driver updates. Do you want to download and install them now?");
-            }, 2000);
-        }, 1000);
-    }
-
-    // Final Success State
     function finishScan() {
         const btn = document.getElementById('heal-btn');
         btn.classList.remove('healing');
@@ -332,7 +366,7 @@
         const iconContainer = st.querySelector('.stage-icon');
         if(status === 'completed') {
             iconContainer.innerHTML = '<i class="fa-solid fa-check"></i>';
-            st.style.borderColor = ""; // Remove yellow warning border
+            st.style.borderColor = ""; 
         } 
         else if (status === 'active') {
             iconContainer.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
