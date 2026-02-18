@@ -158,21 +158,21 @@
                     <i class="fa-solid fa-microchip icon-cpu"></i>
                     <div class="vital-info">
                         <span class="vital-label">CPU Load</span>
-                        <span class="vital-value" id="cpu-val">12%</span>
+                        <span class="vital-value" id="cpu-val">0%</span>
                     </div>
                 </div>
                 <div class="vital-card">
                     <i class="fa-solid fa-memory icon-ram"></i>
                     <div class="vital-info">
                         <span class="vital-label">Memory Usage</span>
-                        <span class="vital-value" id="ram-val">4.2 / 16 GB</span>
+                        <span class="vital-value" id="ram-val">0 / 0 GB</span>
                     </div>
                 </div>
                 <div class="vital-card">
                     <i class="fa-solid fa-dumpster icon-disk"></i>
                     <div class="vital-info">
                         <span class="vital-label">Temp & Junk Files</span>
-                        <span class="vital-value warning" id="temp-val">2.4 GB</span>
+                        <span class="vital-value warning" id="temp-val">0 GB</span>
                     </div>
                 </div>
             </div>
@@ -257,9 +257,13 @@
         <div class="modal-content">
             <div class="modal-header">
                 <i class="fa-solid fa-triangle-exclamation warning-icon"></i>
-                <h2 id="modal-title">Threat Detected</h2>
+                <h2 id="modal-title">Action Required</h2>
             </div>
-            <p id="modal-desc">Windows Defender found a malicious payload in your Temp folder. Do you want SysMedic to remove it safely?</p>
+            <p id="modal-desc" style="white-space: pre-wrap;"></p>
+            
+            <div id="update-checklist" class="hidden" style="text-align: left; margin-bottom: 25px; max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+            </div>
+            
             <div class="modal-actions">
                 <button class="btn-ignore" onclick="handleModalChoice(false)">Ignore</button>
                 <button class="btn-resolve" onclick="handleModalChoice(true)">
@@ -271,10 +275,31 @@
 </div>
 
 <script>
-    // Sidebar
-    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('expanded'); }
+    const { ipcRenderer } = require('electron');
+
+    // --- DASHBOARD VITALS LOGIC ---
+    setInterval(() => {
+        ipcRenderer.send('request-vitals');
+    }, 2000);
+
+    ipcRenderer.on('vitals-update', (event, data) => {
+        document.getElementById('cpu-val').innerText = data.cpu;
+        document.getElementById('ram-val').innerText = data.ram;
+        document.getElementById('temp-val').innerText = data.temp;
+
+        const cpuNum = parseInt(data.cpu);
+        if (cpuNum > 80) {
+            document.getElementById('cpu-val').classList.add('warning');
+        } else {
+            document.getElementById('cpu-val').classList.remove('warning');
+        }
+    });
     
-    // Tabs
+    // --- SIDEBAR TOGGLE LOGIC ---
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('expanded');
+    }
+
     function switchTab(tabId) {
         document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
@@ -293,19 +318,80 @@
         btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i><span>SCANNING</span>';
         btn.disabled = true; 
         for(let i=1; i<=3; i++) updateStageUI(i, 'Waiting...', 'pending');
-        setTimeout(() => updateStageUI(1, 'Executing network and audio fixes...', 'active'), 500);
-        setTimeout(() => updateStageUI(1, 'Resolved successfully', 'completed'), 2500);
-        setTimeout(() => {
-            updateStageUI(2, 'Scanning files...', 'active');
-            setTimeout(() => {
-                updateStageUI(2, 'ACTION REQUIRED: Threat found!', 'warning');
-                scanPausedAtStage = 2; 
-                showModal("Threat Detected", "Windows Defender found a malicious payload. Do you want SysMedic to quarantine it?");
-            }, 2000);
-        }, 3000);
+
+        // Start Stage 1 (Text will be updated by the backend!)
+        updateStageUI(1, 'Initializing basic fixes...', 'active');
+        ipcRenderer.send('start-stage-1');
+    }    
+
+    // NEW LISTENER: Stage 1 Live Progress
+    ipcRenderer.on('stage-1-progress', (event, stepText) => {
+        updateStageUI(1, stepText, 'active');
+    });
+
+    // LISTENER: Stage 1 Done -> Start Stage 2
+    ipcRenderer.on('stage-1-complete', (event, response) => {
+        updateStageUI(1, 'All basic services restored', 'completed');
+        
+        // Start Stage 2
+        updateStageUI(2, 'Scanning files...', 'active');
+        ipcRenderer.send('start-stage-2-scan'); 
+    });
+
+    ipcRenderer.on('threat-detected', (event, data) => {
+        updateStageUI(2, 'ACTION REQUIRED: Threat found!', 'warning');
+        scanPausedAtStage = 2; 
+        
+        showModal(
+            "Threat Detected", 
+            `Windows Defender found '${data.threatName}' at location:\n${data.threatLocation}\n\nDo you want SysMedic to quarantine it safely?`
+        );
+    });
+
+    ipcRenderer.on('scan-2-clean', (event) => {
+        updateStageUI(2, 'No threats detected', 'completed');
+        resumeScanToStage3(); 
+    });
+
+    ipcRenderer.on('threat-resolved', (event, response) => {
+        updateStageUI(2, 'Threat removed successfully', 'completed');
+        resumeScanToStage3();
+    });
+
+    function resumeScanToStage3() {
+        updateStageUI(3, 'Checking for updates...', 'active');
+        ipcRenderer.send('start-stage-3-scan');
     }
 
-    // Modal
+    ipcRenderer.on('updates-found', (event, data) => {
+        updateStageUI(3, 'ACTION REQUIRED: Updates available!', 'warning');
+        scanPausedAtStage = 3; 
+        
+        const checklistDiv = document.getElementById('update-checklist');
+        checklistDiv.innerHTML = '';
+        checklistDiv.classList.remove('hidden'); 
+
+        data.updates.forEach(upd => {
+            const label = document.createElement('label');
+            label.style.display = 'block';
+            label.style.marginBottom = '10px';
+            label.style.color = 'var(--text-main)';
+            label.style.fontSize = '13px';
+            label.style.cursor = 'pointer';
+            
+            label.innerHTML = `<input type="checkbox" value="${upd.id}" checked class="update-cb" style="margin-right: 10px; accent-color: var(--accent);"> ${upd.name}`;
+            checklistDiv.appendChild(label);
+        });
+
+        showModal("System Updates Available", "Please select the updates you want to install:");
+    });
+
+    ipcRenderer.on('updates-resolved', (event) => {
+        updateStageUI(3, 'System is up to date', 'completed');
+        finishScan();
+    });
+
+    // --- MODAL LOGIC ---
     function showModal(title, desc) {
         document.getElementById('modal-title').innerText = title;
         document.getElementById('modal-desc').innerText = desc;
@@ -313,29 +399,34 @@
     }
     function handleModalChoice(isApproved) {
         document.getElementById('permission-modal').classList.add('hidden');
+        document.getElementById('update-checklist').classList.add('hidden'); 
+        
         if (scanPausedAtStage === 2) {
             if (isApproved) {
                 updateStageUI(2, 'Quarantining threat...', 'active');
-                setTimeout(() => { updateStageUI(2, 'Threat removed successfully', 'completed'); resumeScanToStage3(); }, 1500);
-            } else { updateStageUI(2, 'Ignored by user', 'completed'); resumeScanToStage3(); }
-        } 
-        else if (scanPausedAtStage === 3) {
+                ipcRenderer.send('resolve-threat'); 
+            } else {
+                updateStageUI(2, 'Ignored by user', 'completed');
+                resumeScanToStage3();
+            }
+        } else if (scanPausedAtStage === 3) {
             if (isApproved) {
-                updateStageUI(3, 'Downloading and installing updates...', 'active');
-                setTimeout(() => { updateStageUI(3, 'System is up to date', 'completed'); finishScan(); }, 2500);
-            } else { updateStageUI(3, 'Update skipped by user', 'completed'); finishScan(); }
-        }
-    }
+                const checkboxes = document.querySelectorAll('.update-cb:checked');
+                const selectedIds = Array.from(checkboxes).map(cb => cb.value);
 
-    function resumeScanToStage3() {
-        setTimeout(() => {
-            updateStageUI(3, 'Checking for updates...', 'active');
-            setTimeout(() => {
-                updateStageUI(3, 'ACTION REQUIRED: Updates available!', 'warning');
-                scanPausedAtStage = 3; 
-                showModal("System Update Available", "SysMedic found critical OS and Driver updates. Do you want to download and install them now?");
-            }, 2000);
-        }, 1000);
+                if (selectedIds.length === 0) {
+                    updateStageUI(3, 'No updates selected', 'completed');
+                    finishScan();
+                    return;
+                }
+
+                updateStageUI(3, `Installing ${selectedIds.length} update(s)...`, 'active');
+                ipcRenderer.send('resolve-updates', selectedIds); 
+            } else {
+                updateStageUI(3, 'Update skipped by user', 'completed');
+                finishScan();
+            }
+        }
     }
 
     function finishScan() {
@@ -364,8 +455,18 @@
 
 <script>
     // 3. GRAB KEY SECURELY
-    const API_KEY = window.process.argv.find(arg => arg.startsWith('--api-key=')).split('=')[1];
-
+    // const API_KEY = window.process.argv.find(arg => arg.startsWith('--api-key=')).split('=')[1];
+    let API_KEY = "MISSING_KEY";
+    try {
+        const keyArg = process.argv.find(arg => arg.startsWith('--api-key='));
+        if (keyArg) {
+            API_KEY = keyArg.split('=')[1];
+        } else {
+            console.warn("⚠️ SysMedic Warning: API Key argument not found!");
+        }
+    } catch (error) {
+        console.error("⚠️ SysMedic Error reading process.argv:", error);
+    }
     let workingModelName = null;
     let currentAttachment = null; 
     let conversationHistory = []; // Limit history to last 10 turns to save tokens
