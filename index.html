@@ -161,6 +161,30 @@
 </div>
 
 <script>
+
+    const { ipcRenderer } = require('electron');
+    // --- DASHBOARD VITALS LOGIC ---
+    
+    // 1. Ask the backend for stats every 2 seconds
+    setInterval(() => {
+        ipcRenderer.send('request-vitals');
+    }, 2000);
+
+    // 2. Listen for the backend's response and update the screen
+    ipcRenderer.on('vitals-update', (event, data) => {
+        document.getElementById('cpu-val').innerText = data.cpu;
+        document.getElementById('ram-val').innerText = data.ram;
+        document.getElementById('temp-val').innerText = data.temp;
+
+        // Visual flair: turn CPU text red if it goes over 80%
+        const cpuNum = parseInt(data.cpu);
+        if (cpuNum > 80) {
+            document.getElementById('cpu-val').classList.add('warning');
+        } else {
+            document.getElementById('cpu-val').classList.remove('warning');
+        }
+    });
+    
     // --- SIDEBAR TOGGLE LOGIC ---
     function toggleSidebar() {
         document.getElementById('sidebar').classList.toggle('expanded');
@@ -197,7 +221,7 @@
         history.scrollTop = history.scrollHeight;
     }
 
-    // --- HEAL LOGIC & STAGES ---
+    // --- HEAL LOGIC & STAGES (Connected to Backend) ---
     let scanPausedAtStage = 0; 
 
     function triggerHeal() {
@@ -210,20 +234,26 @@
 
         for(let i=1; i<=3; i++) updateStageUI(i, 'Waiting...', 'pending');
 
-        // Stage 1: Basic Fix
-        setTimeout(() => updateStageUI(1, 'Executing network and audio fixes...', 'active'), 500);
-        setTimeout(() => updateStageUI(1, 'Resolved successfully', 'completed'), 2500);
-
-        // Stage 2: Virus Scan (Triggers 1st Modal)
-        setTimeout(() => {
-            updateStageUI(2, 'Scanning files...', 'active');
-            setTimeout(() => {
-                updateStageUI(2, 'ACTION REQUIRED: Threat found!', 'warning');
-                scanPausedAtStage = 2; 
-                showModal("Threat Detected", "Windows Defender found a malicious payload. Do you want SysMedic to quarantine it?");
-            }, 2000);
-        }, 3000);
+        // Start Stage 1
+        updateStageUI(1, 'Executing network and audio fixes...', 'active');
+        ipcRenderer.send('start-stage-1'); // TELL BACKEND TO WORK!
     }
+
+    // LISTENER: When Backend finishes Stage 1
+    ipcRenderer.on('stage-1-complete', (event, response) => {
+        updateStageUI(1, 'Resolved successfully', 'completed');
+        
+        // Start Stage 2
+        updateStageUI(2, 'Scanning files...', 'active');
+        ipcRenderer.send('start-stage-2-scan'); // TELL BACKEND TO SCAN!
+    });
+
+    // LISTENER: When Backend finds a virus
+    ipcRenderer.on('threat-detected', (event, data) => {
+        updateStageUI(2, 'ACTION REQUIRED: Threat found!', 'warning');
+        scanPausedAtStage = 2; 
+        showModal("Threat Detected", `Windows Defender found '${data.threatName}' in your Temp folder. Do you want SysMedic to quarantine it?`);
+    });
 
     // --- MODAL LOGIC ---
     function showModal(title, desc) {
@@ -235,21 +265,16 @@
     function handleModalChoice(isApproved) {
         document.getElementById('permission-modal').classList.add('hidden');
         
-        // If we paused at Stage 2 (Virus Scan)
         if (scanPausedAtStage === 2) {
             if (isApproved) {
                 updateStageUI(2, 'Quarantining threat...', 'active');
-                setTimeout(() => {
-                    updateStageUI(2, 'Threat removed successfully', 'completed');
-                    resumeScanToStage3();
-                }, 1500);
+                ipcRenderer.send('resolve-threat'); // TELL BACKEND TO DELETE IT!
             } else {
                 updateStageUI(2, 'Ignored by user', 'completed');
                 resumeScanToStage3();
             }
-        } 
-        // If we paused at Stage 3 (Updates)
-        else if (scanPausedAtStage === 3) {
+        } else if (scanPausedAtStage === 3) {
+            // (Keep your existing Stage 3 logic here)
             if (isApproved) {
                 updateStageUI(3, 'Downloading and installing updates...', 'active');
                 setTimeout(() => {
@@ -262,6 +287,13 @@
             }
         }
     }
+
+    // LISTENER: When Backend finishes deleting the virus
+    ipcRenderer.on('threat-resolved', (event, response) => {
+        updateStageUI(2, 'Threat removed successfully', 'completed');
+        resumeScanToStage3();
+    });
+    
 
     // Stage 3: Updates (Triggers 2nd Modal)
     function resumeScanToStage3() {
