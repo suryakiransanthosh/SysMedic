@@ -1,6 +1,10 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const { exec } = require('child_process');
 const os = require('os'); // Node's built-in hardware reader
+const path = require('path');
+
+// 1. Load the secret .env file
+require('dotenv').config(); 
 
 function createWindow() {
     const win = new BrowserWindow({
@@ -8,11 +12,14 @@ function createWindow() {
         height: 800,
         webPreferences: {
             nodeIntegration: true,
-            contextIsolation: false 
+            contextIsolation: false, 
+            additionalArguments: [`--api-key=${process.env.GEMINI_API_KEY}`]
         }
     });
     win.removeMenu();
     win.loadFile('index.html');
+
+    // win.webContents.openDevTools();
 }
 
 app.whenReady().then(createWindow);
