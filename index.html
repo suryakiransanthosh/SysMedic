@@ -303,17 +303,21 @@
         btn.disabled = true; 
         for(let i=1; i<=3; i++) updateStageUI(i, 'Waiting...', 'pending');
 
-        // Start Stage 1 
+        // Start Stage 1 (Text will be updated by the backend!)
         updateStageUI(1, 'Initializing basic fixes...', 'active');
         ipcRenderer.send('start-stage-1');
-    }   
+    }    
 
+    // NEW LISTENER: Stage 1 Live Progress
     ipcRenderer.on('stage-1-progress', (event, stepText) => {
         updateStageUI(1, stepText, 'active');
     });
 
+    // LISTENER: Stage 1 Done -> Start Stage 2
     ipcRenderer.on('stage-1-complete', (event, response) => {
         updateStageUI(1, 'All basic services restored', 'completed');
+        
+        // Start Stage 2
         updateStageUI(2, 'Scanning files...', 'active');
         ipcRenderer.send('start-stage-2-scan'); 
     });
@@ -435,17 +439,19 @@
 </script>
 
 <script>
-    // Safe API Key retrieval for Electron
-    let API_KEY = "";
+    // 3. GRAB KEY SECURELY
+    // const API_KEY = window.process.argv.find(arg => arg.startsWith('--api-key=')).split('=')[1];
+    let API_KEY = "MISSING_KEY";
     try {
-        const keyArg = window.process.argv.find(arg => arg.startsWith('--api-key='));
+        const keyArg = process.argv.find(arg => arg.startsWith('--api-key='));
         if (keyArg) {
             API_KEY = keyArg.split('=')[1];
+        } else {
+            console.warn("⚠️ SysMedic Warning: API Key argument not found!");
         }
-    } catch (e) {
-        console.error("API Key not found in arguments.");
+    } catch (error) {
+        console.error("⚠️ SysMedic Error reading process.argv:", error);
     }
-
     let workingModelName = null;
     let currentAttachment = null; 
     let conversationHistory = [];
