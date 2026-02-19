@@ -11,7 +11,12 @@
 }
 
 body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: var(--bg-dark); color: var(--text-main); overflow: hidden; }
-.app-container { display: flex; height: 100vh; }
+.app-container {
+    display: flex;
+    height: 100vh;
+    width: 100vw; /* Explicitly set width */
+    overflow: hidden; /* Ensure no overflow from the flex container */
+}
 
 /* --- NEW COLLAPSIBLE SIDEBAR --- */
 .sidebar {
@@ -65,9 +70,15 @@ body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: var(--b
     opacity: 0; 
     white-space: nowrap;
     transition: 0.3s ease;
+    transition: opacity 0.2s ease, visibility 0.2s;
+    visibility: hidden;
 }
 
-.sidebar.expanded .brand { opacity: 1; }
+.sidebar.expanded .brand { 
+    opacity: 1; 
+    visibility: visible;
+    transition-delay: 0.1s; /* Shows text after sidebar has started expanding */
+}
 .logo-icon { margin-right: 8px; font-size: 22px; }
 .toggle-btn {
     background: transparent;
@@ -124,7 +135,13 @@ body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: var(--b
 .spacer { flex: 1; } /* Pushes settings/account to bottom */
 
 /* (Keep all other styles for Content, Dashboard, Chat from before) */
-.content { flex: 1; padding: 40px; overflow-y: auto; }
+.content {
+    flex: 1;
+    padding: 40px;
+    height: 100vh; /* Lock height */
+    box-sizing: border-box; /* Crucial: includes padding in height calculation */
+    overflow: hidden; /* Prevent the main area from scrolling */
+}
 .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px; }
 .user-badge { background: var(--glass); padding: 5px 15px; border-radius: 20px; font-size: 12px; border: 1px solid rgba(255,255,255,0.1); }
 /* --- DASHBOARD UPDATES --- */
@@ -279,8 +296,25 @@ body { margin: 0; font-family: 'Segoe UI', sans-serif; background-color: var(--b
 .dot { width: 12px; height: 12px; border-radius: 50%; }
 .red { background: #ff5f56; } .yellow { background: #ffbd2e; } .green { background: #27c93f; }
 .title { color: #888; font-size: 12px; margin-left: 10px; }
-.chat-interface { display: flex; flex-direction: column; height: calc(100vh - 140px); background: rgba(0, 0, 0, 0.2); border-radius: 15px; border: 1px solid rgba(255, 255, 255, 0.05); overflow: hidden; }
-.chat-history { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+.chat-interface {
+    display: flex;
+    flex-direction: column;
+    /* Subtract top-bar height and padding to fit perfectly */
+    height: calc(100vh - 180px); 
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    overflow: hidden; /* The interface itself shouldn't scroll */
+}
+
+.chat-history {
+    flex: 1;
+    padding: 20px;
+    overflow-y: overlay; /* Only the history scrolls */
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
 .message { display: flex; gap: 15px; max-width: 80%; }
 .message.bot { align-self: flex-start; }
 .message.user { align-self: flex-end; flex-direction: row-reverse; }
