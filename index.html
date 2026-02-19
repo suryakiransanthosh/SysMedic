@@ -81,22 +81,6 @@
             border: 2px solid #f59e0b !important;
             box-shadow: 0 0 10px rgba(245, 158, 11, 0.3) !important;
         }
-
-        /* NEW: Action Buttons in Chat */
-        .chat-action-btn {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 8px 16px;
-            background: #10b981;
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: background 0.2s;
-        }
-        .chat-action-btn:hover { background: #059669; }
-        .chat-action-btn i { margin-right: 5px; }
     </style>
 </head>
 <body>
@@ -221,7 +205,7 @@
                 <div class="chat-history" id="chat-history">
                     <div class="message bot">
                         <div class="avatar"><i class="fa-solid fa-robot"></i></div>
-                        <div class="bubble">Hello! I am SysMedic. Describe your problem or upload a screenshot.</div>
+                        <div class="bubble">Hello! I am SysMedic. Describe your problem or upload a screenshot, and I will help you fix it.</div>
                     </div>
                 </div>
                 
@@ -397,6 +381,7 @@
         document.getElementById('modal-desc').innerText = desc;
         document.getElementById('permission-modal').classList.remove('hidden');
     }
+    
     function handleModalChoice(isApproved) {
         document.getElementById('permission-modal').classList.add('hidden');
         document.getElementById('update-checklist').classList.add('hidden'); 
@@ -469,9 +454,10 @@
     }
     let workingModelName = null;
     let currentAttachment = null; 
-    let conversationHistory = []; // Limit history to last 10 turns to save tokens
+    let conversationHistory = [];
 
     // --- NESTED GUIDE STACK ---
+    // Index 0 = Main Guide, Index 1 = Sub Guide, etc.
     let guideStack = []; 
     let stepTimer = null;
     let waitingForUserConfirmation = false;
@@ -517,7 +503,7 @@
     // --- UI HELPERS ---
     function handleEnter(e) { if (e.key === 'Enter') sendMessage(); }
 
-    function addMessage(text, sender, isLoading = false, attachment = null, showDoneButton = false) {
+    function addMessage(text, sender, isLoading = false, attachment = null) {
         const history = document.getElementById('chat-history');
         const msgDiv = document.createElement('div');
         msgDiv.className = `message ${sender}`;
@@ -542,24 +528,11 @@
             }
         }
 
-        // ADD "DONE" BUTTON IF REQUESTED
-        let btnHtml = '';
-        if (showDoneButton) {
-            btnHtml = `<br><button class="chat-action-btn" onclick="triggerUserDone()"><i class="fa-solid fa-check"></i> Task Completed</button>`;
-        }
-
-        msgDiv.innerHTML = `<div class="avatar">${icon}</div><div class="bubble">${formattedText}${mediaHtml}${btnHtml}</div>`;
+        msgDiv.innerHTML = `<div class="avatar">${icon}</div><div class="bubble">${formattedText}${mediaHtml}</div>`;
         history.appendChild(msgDiv);
         history.scrollTop = history.scrollHeight;
         return msgDiv.id;
     }
-
-    // Function to simulate user typing "Done"
-    window.triggerUserDone = function() {
-        const input = document.getElementById('user-input');
-        input.value = "Done";
-        sendMessage();
-    };
 
     // --- MODEL FINDER ---
     async function getValidModel() {
@@ -581,80 +554,103 @@
 
     // --- NESTED GUIDE LOGIC ---
     function startGuide(steps, topic) {
-        guideStack.push({ steps: steps, index: 0, topic: topic });
+        // Push new guide to stack
+        guideStack.push({
+            steps: steps,
+            index: 0,
+            topic: topic
+        });
         
+        // Update UI Look
         const inputWrapper = document.getElementById('chat-input-wrapper');
         inputWrapper.classList.add('interactive-active');
         if (guideStack.length > 1) {
-            inputWrapper.classList.add('subguide-active');
-            addMessage(`🔧 **Detour:** Fixing "${topic}" first...`, 'bot');
+            inputWrapper.classList.add('subguide-active'); // Orange border for nested
+            addMessage(`🔧 **Detour:** Let's fix "${topic}" first, then go back to the main problem.`, 'bot');
         }
+
         showCurrentStep();
     }
 
     function showCurrentStep() {
         if (guideStack.length === 0) return;
-        const currentGuide = guideStack[guideStack.length - 1];
+
+        const currentGuide = guideStack[guideStack.length - 1]; 
         
+        // Check if finished
         if (currentGuide.index >= currentGuide.steps.length) {
-            guideStack.pop();
+            guideStack.pop(); 
+            
             if (guideStack.length > 0) {
+                // Return to previous guide
                 const parentGuide = guideStack[guideStack.length - 1];
                 document.getElementById('chat-input-wrapper').classList.remove('subguide-active');
-                addMessage(`✅ "${currentGuide.topic}" done! Returning to **${parentGuide.topic}** (Step ${parentGuide.index + 1}).`, 'bot');
+                addMessage(`✅ "${currentGuide.topic}" resolved! Now back to **${parentGuide.topic}** (Step ${parentGuide.index + 1}).`, 'bot');
                 showCurrentStep(); 
             } else {
-                addMessage("✅ All steps complete! System repaired.", 'bot');
+                // All guides done
+                addMessage("✅ All steps complete! Is your system fully repaired?", 'bot');
                 document.getElementById('chat-input-wrapper').classList.remove('interactive-active');
                 document.getElementById('chat-input-wrapper').classList.remove('subguide-active');
             }
             return;
         }
 
-        const stepText = `👉 **Step ${currentGuide.index + 1} (${currentGuide.topic}):** ${currentGuide.steps[currentGuide.index]}`;
-        
-        // Show step WITH the button
-        addMessage(stepText, 'bot', false, null, true);
+        const stepText = `👉 **Step ${currentGuide.index + 1} (${currentGuide.topic}):** ${currentGuide.steps[currentGuide.index]} \n\n(Perform this now. I will ask you in 10s)`;
+        addMessage(stepText, 'bot');
         
         waitingForUserConfirmation = true;
+
+        if(stepTimer) clearTimeout(stepTimer);
+        stepTimer = setTimeout(() => {
+            if (waitingForUserConfirmation && guideStack.length > 0) {
+                addMessage("⏳ **Have you done it?** (Type 'Yes' to continue, or tell me if you are stuck)", 'bot');
+            }
+        }, 10000); 
     }
 
     // --- MAIN SEND FUNCTION ---
     async function sendMessage() {
         const input = document.getElementById('user-input');
         const text = input.value.trim();
+        
         if (text === "" && !currentAttachment) return;
 
         addMessage(text, 'user', false, currentAttachment);
         input.value = "";
         
-        // --- INTERACTIVE CHECK (Updated with Smarter "Yes") ---
+        // --- INTERACTIVE CONFIRMATION CHECK ---
         if (guideStack.length > 0 && waitingForUserConfirmation) {
             const lower = text.toLowerCase();
-            const yesWords = ['yes', 'done', 'ok', 'completed', 'finished', 'sure', 'found', 'fixed', 'solved'];
+            const yesWords = ['yes', 'done', 'ok', 'completed', 'finished', 'sure'];
             const waitWords = ['no', 'wait', 'hold on', 'not yet', 'pause'];
 
-            const isYes = yesWords.some(w => lower.includes(w) && lower.length < 20);
+            const isYes = yesWords.some(w => lower.includes(w) && lower.length < 15);
             const isWait = waitWords.some(w => lower.includes(w) && lower.length < 15);
 
             if (isYes) {
                 waitingForUserConfirmation = false;
+                clearTimeout(stepTimer);
                 guideStack[guideStack.length - 1].index++;
                 setTimeout(showCurrentStep, 500); 
                 return;
             } 
             else if (isWait) {
-                addMessage("Okay, click 'Task Completed' when ready.", 'bot');
+                addMessage("Okay, no rush. Type 'Done' whenever you are ready.", 'bot');
+                clearTimeout(stepTimer); 
                 return;
             }
             else {
-                addMessage("🔍 Analyzing sub-issue...", 'bot', true);
+                // DETOUR: User typed something else (a new problem)
+                clearTimeout(stepTimer);
+                addMessage("🔍 I see a sub-issue. Analyzing...", 'bot', true);
             }
         }
 
         // --- PREPARE PAYLOAD ---
         const fileToSend = currentAttachment;
         clearAttachment();
+
         const loadingId = document.getElementById('msg-' + Date.now()) ? null : addMessage("Thinking...", 'bot', true);
 
         try {
@@ -663,11 +659,7 @@
             
             let userParts = [];
             
-            // Limit History to last 8 messages (Prevents 429 Error on long chats)
-            if (conversationHistory.length > 8) {
-                conversationHistory = conversationHistory.slice(conversationHistory.length - 8);
-            }
-
+            // SYSTEM PROMPT (Once)
             if (conversationHistory.length === 0) {
                  userParts.push({ text: `
                     You are SysMedic. 
@@ -676,16 +668,17 @@
                     2. ALWAYS END WITH: "||Can I lead you to solve the issue?||"
                     
                     Interactive Guide:
-                    If user says 'Yes', output JSON:
+                    If user says 'Yes' to leading, output JSON:
                     $$STEPS_START$$["Step 1", "Step 2"]$$STEPS_END$$
 
                     Nested Detour Protocol:
-                    If user is IN a guide but reports a NEW error (e.g. "I can't find it"), 
-                    generate a JSON for a SUB-GUIDE:
+                    If the user is ALREADY inside a guide but reports a NEW error (e.g., "I can't find the button"), 
+                    generate a JSON for a SUB-GUIDE for that specific small problem:
                     $$STEPS_START$$["Sub-Step 1", "Sub-Step 2"]$$STEPS_END$$
                 `});
             }
 
+            // Context: Are we in a guide?
             if (guideStack.length > 0 && waitingForUserConfirmation) {
                  const currentGuide = guideStack[guideStack.length - 1];
                  userParts.push({ text: `[SYSTEM: User is paused on Step ${currentGuide.index+1} of guide "${currentGuide.topic}". They reported:] ` + text });
@@ -694,7 +687,9 @@
             }
 
             if (fileToSend && fileToSend.type === 'image') {
-                userParts.push({ inlineData: { mimeType: fileToSend.mimeType, data: fileToSend.data } });
+                userParts.push({
+                    inlineData: { mimeType: fileToSend.mimeType, data: fileToSend.data }
+                });
             }
 
             conversationHistory.push({ role: "user", parts: userParts });
@@ -705,10 +700,6 @@
                 body: JSON.stringify({ contents: conversationHistory })
             });
 
-            // --- 429 ERROR HANDLING ---
-            if (response.status === 429) {
-                throw new Error("You are chatting too fast! Please wait 1 minute.");
-            }
             if (!response.ok) throw new Error(response.statusText);
 
             const data = await response.json();
@@ -718,17 +709,21 @@
 
             if(loadingId && document.getElementById(loadingId)) document.getElementById(loadingId).remove();
             
-            // Remove snag bubble
-            const bubbles = document.querySelectorAll('.message.bot');
-            if(bubbles.length > 0 && bubbles[bubbles.length-1].innerText.includes("Analyzing")) {
-                bubbles[bubbles.length-1].remove();
-            }
+            // Remove "snag" bubble if it exists
+            const snagBubbles = document.querySelectorAll('.message.bot');
+            const lastBubble = snagBubbles[snagBubbles.length - 1];
+            if(lastBubble.innerText.includes("Analyzing...")) lastBubble.remove();
 
+            // --- TRIGGER CHECKS ---
             if (aiText.includes("$$STEPS_START$$")) {
                 const jsonStr = aiText.split("$$STEPS_START$$")[1].split("$$STEPS_END$$")[0];
                 try {
                     const steps = JSON.parse(jsonStr);
-                    let topic = guideStack.length === 0 ? "Main Repair" : "Sub-Repair";
+                    // Determine Topic Name
+                    let topic = "Repair";
+                    if (guideStack.length === 0) topic = "Main Issue";
+                    else topic = "Sub-Issue"; // Simplified naming
+                    
                     addMessage(`🚀 Starting Guide for ${topic}...`, 'bot');
                     startGuide(steps, topic);
                 } catch(e) {
