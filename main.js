@@ -6,20 +6,82 @@ const path = require('path');
 // 1. Load the secret .env file
 require('dotenv').config(); 
 
+// New PowerShell query that includes Manufacturer
+const psCommand = `
+    $sys = Get-CimInstance Win32_ComputerSystem;
+    $disk = Get-CimInstance Win32_LogicalDisk -Filter "DeviceID='C:'";
+    $gpu = Get-CimInstance Win32_VideoController | Select-Object -First 1;
+    $diskTotal = [math]::Round($disk.Size / 1GB, 0);
+    $diskFree = [math]::Round($disk.FreeSpace / 1GB, 0);
+    Write-Output "$($sys.Manufacturer)|$($gpu.Name)|$($diskTotal)|$($diskFree)"
+`;
+
+
+// --- FETCH RECENT WINDOWS SYSTEM ERRORS ---
+ipcMain.on('request-system-logs', (event) => {
+    // Updated to use -replace '[\\r\\n]' to safely strip newlines without quote conflicts
+    const psLogCommand = "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; $ErrorActionPreference = 'Stop'; try { $events = Get-WinEvent -FilterHashtable @{LogName='System'; Level=2} -MaxEvents 5 -ErrorAction Stop; if ($events) { $events | ForEach-Object { $_.TimeCreated.ToString('MM-dd HH:mm') + ' - ID ' + $_.Id + ': ' + ($_.Message -replace '[\\r\\n]', ' ') } } else { Write-Output 'No recent system errors found.' } } catch { Write-Output 'PS_ERROR: ' + $_.Exception.Message }";
+
+    exec(`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "${psLogCommand}"`, (error, stdout, stderr) => {
+        let cleanLogs = stdout ? stdout.trim() : "No critical logs detected.";
+        if (error || stderr || cleanLogs.includes("PS_ERROR:")) {
+            cleanLogs = `Failed to read system logs. Reason: ${stderr || cleanLogs}`;
+        }
+        
+        event.reply('system-logs-data', cleanLogs);
+    });
+});
+
+ipcMain.on('email-support-ticket', (event, { ticketContent, manufacturer, userEmail, userPass }) => {
+    const supportDirectory = {
+        'Lenovo': 'support@lenovo.com',
+        'Dell Inc.': 'support@dell.com',
+        'HP': 'support@hp.com'
+    };
+
+    const targetEmail = supportDirectory[manufacturer] || 'general-support@sysmedic.local';
+
+    // Use the user's account details provided from the frontend
+    const transporter = nodemailer.createTransport({
+        service: 'gmail', // Or 'outlook', 'yahoo', etc.
+        auth: {
+            user: userEmail,
+            pass: userPass 
+        }
+    });
+
+    const mailOptions = {
+        from: `SysMedic [${userEmail}]`,
+        to: targetEmail,
+        subject: `Diagnostic Report - ${os.hostname()}`,
+        text: ticketContent
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error(error);
+            event.reply('email-sent-status', { success: false, error: error.message });
+        } else {
+            event.reply('email-sent-status', { success: true });
+        }
+    });
+});
+
 function createWindow() {
     const win = new BrowserWindow({
         width: 1200,
         height: 800,
         webPreferences: {
-            nodeIntegration: true,
-            contextIsolation: false, 
+            nodeIntegration: false,  // SECURED: Frontend cannot run Node
+            contextIsolation: true,  // SECURED: Protects against XSS attacks
+            preload: path.join(__dirname, 'preload.js'), // Loads the bridge
             additionalArguments: [`--api-key=${process.env.GEMINI_API_KEY}`]
         }
     });
     win.removeMenu();
     win.loadFile('index.html');
 
-    // win.webContents.openDevTools();
+    win.webContents.openDevTools();
 }
 
 app.whenReady().then(createWindow);
@@ -241,4 +303,52 @@ ipcMain.on('resolve-updates', (event, selectedUpdateIds) => {
     
     // 🟢 SAFE DEV MODE (Active)
     setTimeout(() => { event.reply('updates-resolved', { success: true }); }, 2500);
+});
+
+ipcMain.on('request-pc-info', (event) => {
+    // 1. Basic Node.js info
+    const ramSize = (os.totalmem() / (1024 ** 3)).toFixed(0) + " GB";
+    const cores = os.cpus().length + " Threads";
+    const platformName = `${os.type()} ${os.release()}`; 
+
+    // 2. Safely formatted, single-line PowerShell command
+    const psCommand = "[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; $sys = Get-CimInstance Win32_ComputerSystem; $disk = Get-CimInstance Win32_LogicalDisk -Filter 'DeviceID=''C:'''; $gpu = Get-CimInstance Win32_VideoController | Select-Object -First 1; Write-Output ($sys.Manufacturer + '|' + $gpu.Name + '|' + [math]::Round($disk.Size/1GB,0) + '|' + [math]::Round($disk.FreeSpace/1GB,0))";
+
+    // 3. Added -ExecutionPolicy Bypass to prevent Windows from blocking the script
+    exec(`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "${psCommand}"`, (error, stdout, stderr) => {
+        if (error) {
+            console.error("SysMedic Background Error:", stderr || error.message);
+        }
+
+        const parts = (stdout || "").trim().split('|');
+        
+        // Grab the manufacturer, fallback to generic if it fails
+        const manufacturer = parts[0] ? parts[0].trim() : "Unknown Manufacturer";
+        const gpuName = parts[1] ? parts[1].trim() : "Integrated Graphics";
+        const ssdTotal = parts[2] ? parts[2].trim() + " GB" : "Detecting...";
+        const ssdUsed = parts[2] ? (parseInt(parts[2]) - parseInt(parts[3] || 0)) : 0;
+
+        // Note for IPv4: Node 18+ sometimes returns the number 4 instead of the string 'IPv4'
+        const ipAddress = Object.values(os.networkInterfaces())
+            .flat()
+            .find(i => (i.family === 'IPv4' || i.family === 4) && !i.internal)?.address || "Offline";
+
+        const info = {
+            manufacturer: manufacturer,
+            model: os.hostname(),
+            serial: "SYS-" + os.hostname().split('-').pop(), 
+            processor: os.cpus()[0].model,
+            cores: cores,
+            arch: os.arch(),
+            platform: platformName,
+            ram: ramSize,
+            gpu: gpuName,
+            vram: "Shared",
+            ssd: ssdTotal,
+            ssdUsed: ssdUsed,
+            ip: ipAddress,
+            uptime: (os.uptime() / 3600).toFixed(1) + " hours"
+        };
+        event.reply('pc-info-data', info);
+    });
 });
