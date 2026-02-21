@@ -11,7 +11,6 @@
     </style>
 </head>
 <body>
-
 <div id="login-screen" class="login-screen">
     <div class="login-card">
         <div class="login-logo">
@@ -466,6 +465,12 @@
 </script>
 
 <script>
+    document.addEventListener('DOMContentLoaded', () => {
+    console.log("App loaded. Booting background hardware scan...");
+    if (window.electronAPI && window.electronAPI.requestPcInfo) {
+        window.electronAPI.requestPcInfo();
+    }
+});
 
     setInterval(() => { window.electronAPI.requestVitals(); }, 2000);
 
@@ -488,9 +493,6 @@ function switchTab(tabId) {
         if (targetTab) targetTab.classList.remove('hidden');
 
         // 👇 TRIGGER DATA REQUEST WHEN OPENING INFO TAB 👇
-        if (tabId === 'info') {
-            window.electronAPI.requestPcInfo();
-        }
         
         // This ensures the sidebar button stays highlighted
         const navBtn = document.querySelector(`button[onclick="switchTab('${tabId}')"]`);
@@ -625,14 +627,17 @@ function switchTab(tabId) {
         checklistDiv.innerHTML = '';
         checklistDiv.classList.remove('hidden'); 
 
-        data.updates.forEach(upd => {
+        // 🔥 FIX 1: Loop over 'data' directly instead of 'data.updates'
+        data.forEach(upd => {
             const label = document.createElement('label');
             label.style.display = 'block';
             label.style.marginBottom = '10px';
             label.style.color = 'var(--text-main)';
             label.style.fontSize = '13px';
             label.style.cursor = 'pointer';
-            label.innerHTML = `<input type="checkbox" value="${upd.id}" checked class="update-cb" style="margin-right: 10px; accent-color: var(--accent);"> ${upd.name}`;
+            
+            // 🔥 FIX 2: Print 'upd.title' instead of 'upd.name'
+            label.innerHTML = `<input type="checkbox" value="${upd.id}" checked class="update-cb" style="margin-right: 10px; accent-color: var(--accent);"> ${upd.title}`;
             checklistDiv.appendChild(label);
         });
 
@@ -1064,42 +1069,107 @@ function switchTab(tabId) {
     }
 }
 
-function sendSupportTicket() {
-    // 1. Grab Electron's shell module to open native apps
-    const { shell } = require('electron'); 
+async function sendSupportTicket() {
+    console.log("=== STARTING EMAIL DISPATCH DEBUG ===");
     
-    // 2. Get the generated ticket and manufacturer
-    const ticketText = document.getElementById('ticket-output').innerText;
-    const manufacturer = document.getElementById('dev-manufacturer')?.innerText || 'Unknown'; 
-
-    // 3. Define the routing directory
-    const supportDirectory = {
-        'Lenovo': 'support@lenovo.com',
-        'Dell Inc.': 'support@dell.com',
-        'HP': 'support@hp.com'
-    };
-    
-    // Determine the email, fallback to a local one if manufacturer isn't in the list
-    const targetEmail = supportDirectory[manufacturer] || 'general-support@sysmedic.local';
-
-    // 4. Format the email subject and body for a URL
-    const subject = encodeURIComponent(`SysMedic Diagnostic Report - ${manufacturer}`);
-    const body = encodeURIComponent(ticketText);
-
-    // 5. Instantly open Windows Mail / Outlook with everything pre-filled
-    shell.openExternal(`mailto:${targetEmail}?subject=${subject}&body=${body}`);
-    
-    // 6. Update the button UI to show it worked
     const sendBtn = document.getElementById('btn-send-ticket');
-    sendBtn.innerHTML = '<i class="fa-solid fa-check"></i> Opened in Mail Client';
-    sendBtn.style.background = "var(--success)";
+    const originalBtnText = sendBtn.innerHTML;
+    const originalBg = sendBtn.style.background;
+
+    // 1. Lock the button
+    sendBtn.disabled = true;
+    sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Checking Hardware...';
+
+    let manufacturerElem = document.getElementById('dev-manufacturer');
+    if (!manufacturerElem) console.error("DEBUG: Could not find HTML element 'dev-manufacturer'!");
+
+    // 🔥 FIX 1: textContent instead of innerText 🔥
+    let rawText = manufacturerElem ? manufacturerElem.textContent : "";
+    console.log(`DEBUG: Initial raw text fetched: "${rawText}"`);
+
+    // 2. THE DELAY LOOP
+    let attempts = 0;
+    while ((rawText.toUpperCase().includes("DETECTING") || rawText.trim() === "") && attempts < 10) {
+        console.log(`DEBUG: Hardware still loading... Waiting 1s (Attempt ${attempts + 1}/10)`);
+        await new Promise(resolve => setTimeout(resolve, 1000)); 
+        
+        // 🔥 FIX 2: textContent instead of innerText 🔥
+        let liveElem = document.getElementById('dev-manufacturer');
+        rawText = liveElem ? liveElem.textContent : "";
+        
+        attempts++;
+    }
+
+    // 3. TIMEOUT FALLBACK
+    if (rawText.toUpperCase().includes("DETECTING") || rawText.trim() === "") {
+        console.warn("DEBUG: Loop timed out. Manufacturer never loaded.");
+        alert("Hardware detection took too long. Please ensure the scan finished and try again.");
+        sendBtn.innerHTML = originalBtnText;
+        sendBtn.disabled = false;
+        return; 
+    }
+
+    // 3. CLEANING & ADVANCED DEBUGGING
+    console.log(`DEBUG: Raw text before cleaning: "${rawText}"`);
+    let manufacturer = rawText.replace(/Manufacturer:/ig, "").trim().toUpperCase();
+    console.log(`DEBUG: Cleaned manufacturer string: "${manufacturer}"`);
     
-    // Reset the button after 4 seconds
+    // The Ghost Character Catcher
+    console.log("DEBUG: Character breakdown (checking for hidden spaces/newlines):");
+    for(let i = 0; i < manufacturer.length; i++) {
+        console.log(`   Char ${i}: '${manufacturer[i]}' (Code: ${manufacturer.charCodeAt(i)})`);
+    }
+
+    // 4. THE ADDRESS BOOK
+    const supportDirectory = {
+        'LENOVO': 'support@lenovo.com',
+        'DELL INC.': 'support@dell.com',
+        'HP': 'support@hp.com',
+        'ASUSTEK COMPUTER INC.': 'support@asus.com',
+        'ACER': 'support@acer.com'
+    };
+
+    const targetEmail = supportDirectory[manufacturer];
+    
+    // 5. DID IT MATCH?
+    if (targetEmail) {
+        console.log(`DEBUG: MATCH FOUND! Email mapped to: ${targetEmail}`);
+    } else {
+        console.warn(`DEBUG: NO MATCH FOUND for "${manufacturer}". Falling back to sysmedic.local`);
+    }
+
+    const finalEmail = targetEmail || 'general-support@sysmedic.local';
+
+    // 6. TICKET CHECK
+    const ticketElem = document.getElementById('ticket-output');
+    // 🔥 FIX 3: textContent instead of innerText 🔥
+    const ticketText = ticketElem ? ticketElem.textContent.trim() : "";
+
+    if (!ticketText) {
+        console.error("DEBUG: Ticket text is empty.");
+        alert("Please let the AI generate the diagnostic ticket first!");
+        sendBtn.innerHTML = originalBtnText;
+        sendBtn.disabled = false;
+        return;
+    }
+
+    // 7. DISPATCH
+    console.log("DEBUG: All checks passed. Opening mail client...");
+    const subject = encodeURIComponent(`SysMedic Report - ${manufacturer}`);
+    const body = encodeURIComponent(ticketText);
+    window.location.href = `mailto:${finalEmail}?subject=${subject}&body=${body}`;
+
+    // 8. RESET UI
+    sendBtn.innerHTML = '<i class="fa-solid fa-check"></i> Opened in Mail';
+    sendBtn.style.background = "#28a745"; 
+
     setTimeout(() => {
-        sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Dispatch to Support Team';
-        sendBtn.style.background = "var(--accent)";
+        sendBtn.innerHTML = originalBtnText;
+        sendBtn.style.background = originalBg;
         sendBtn.disabled = false;
     }, 4000);
+    
+    console.log("=== END EMAIL DISPATCH DEBUG ===");
 }
 // Listen for the result from the backend
 // window.electronAPI.onEmailSentStatus((result) => {

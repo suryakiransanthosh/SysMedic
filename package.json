@@ -1,6 +1,6 @@
 {
-  "name": "SysMedic",
-  "version": "1.0.0",
+  "name": "sysmedic",
+  "version": "1.1.0",
   "description": "System diagnostics and repair AI",
   "main": "main.js",
   "scripts": {
