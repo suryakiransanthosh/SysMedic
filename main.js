@@ -132,42 +132,39 @@ ipcMain.on('request-vitals', (event) => {
 // (Real commands commented out for PC safety. Uncomment in VM.)
 // ==========================================
 
-// --- STAGE 1: Basic Command Fixes ---
+// --- STAGE 1: REAL VIRTUAL MACHINE FIXES ---
 ipcMain.on('start-stage-1', (event) => {
-    console.log("Backend received: Starting Stage 1 multi-step fixes...");
+    console.log("Starting real Stage 1 fixes on VM...");
+    const { exec } = require('child_process');
 
-    /* ⚠️ DANGER ZONE ⚠️
-    // A single PowerShell script that chains multiple fixes together.
-    const psStage1 = `
-        ipconfig /flushdns | Out-Null;
-        netsh winsock reset | Out-Null;
-        Restart-Service Audiosrv -Force;
-    `;
-    exec(\`powershell.exe -Command "\${psStage1}"\`, (error, stdout) => {
-        // In a real VM, this entire block would run and then trigger 'complete'
-        event.reply('stage-1-complete', { success: true });
-    });
-    */
-
-    // 🟢 SAFE DEV MODE (Active) - Simulating real-time progress updates!
+    // Step 1
     event.reply('stage-1-progress', 'Flushing DNS Cache...');
+    exec('powershell.exe -NoProfile -Command "ipconfig /flushdns"', (err1) => {
+        if (err1) console.log("DNS Flush failed:", err1);
 
-    setTimeout(() => {
+        // Step 2
         event.reply('stage-1-progress', 'Resetting Network Sockets...');
-    }, 1500);
+        exec('powershell.exe -NoProfile -Command "netsh winsock reset"', (err2) => {
+            if (err2) console.log("Winsock reset failed:", err2);
 
-    setTimeout(() => {
-        event.reply('stage-1-progress', 'Restarting Windows Audio Service...');
-    }, 3000);
+            // Step 3
+            event.reply('stage-1-progress', 'Restarting Windows Audio Service...');
+            exec('powershell.exe -NoProfile -Command "Restart-Service Audiosrv -Force"', (err3) => {
+                if (err3) console.log("Audio service restart failed:", err3);
 
-    setTimeout(() => {
-        event.reply('stage-1-complete', { success: true });
-    }, 4500);
+                // All done! Safely move to Stage 2
+                console.log("Stage 1 completed.");
+                event.reply('stage-1-complete');
+            });
+        });
+    });
 });
-// --- STAGE 2: Virus Scan ---
+
+// --- STAGE 2: REAL VIRUS SCAN ---
 ipcMain.on('start-stage-2-scan', (event) => {
-    /* ⚠️ DANGER ZONE ⚠️
-    // Updated PowerShell to grab both the Name and the Location (Resources), separated by a "|"
+    console.log("Starting real Stage 2 Defender Scan on VM...");
+
+    // The real PowerShell command
     const psCommand = `
         Start-MpScan -ScanType QuickScan; 
         $threat = Get-MpThreat | Select-Object -First 1; 
@@ -178,100 +175,104 @@ ipcMain.on('start-stage-2-scan', (event) => {
         }
     `;
     
-    exec(`powershell.exe -Command "${psCommand}"`, { maxBuffer: 1024 * 1024 }, (error, stdout) => {
-        const result = stdout.trim();
-        if (result !== "CLEAN" && result !== "") {
-            // Split the output into [Name, Location]
-            const parts = result.split('|');
-            event.reply('threat-detected', { 
-                threatName: parts[0], 
-                threatLocation: parts[1] || 'Unknown location' 
-            });
-        } else {
-            event.reply('scan-2-clean');
-        }
+    // Increased buffer and added execution bypass for safety
+    exec(`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "${psCommand}"`, 
+        { maxBuffer: 1024 * 1024 * 10 }, 
+        (error, stdout, stderr) => {
+            
+            if (error && !stdout) {
+                console.log("Scan execution error:", error);
+                event.reply('threat-detected', { 
+                    threatName: 'Scan Engine Error', 
+                    threatLocation: 'Windows Defender Service' 
+                });
+                return;
+            }
+
+            const result = stdout ? stdout.trim() : "CLEAN";
+            
+            if (result !== "CLEAN" && result !== "") {
+                const parts = result.split('|');
+                event.reply('threat-detected', { 
+                    threatName: parts[0] || 'Unknown Threat', 
+                    threatLocation: parts[1] || 'Unknown location' 
+                });
+            } else {
+                console.log("Scan completely clean.");
+                event.reply('scan-2-clean');
+            }
     });
-    */
-    
-    // 🟢 SAFE DEV MODE (Active)
-    setTimeout(() => { 
-        event.reply('threat-detected', { 
-            threatName: 'Trojan:Win32/Malware',
-            threatLocation: 'C:\\Users\\Admin\\Downloads\\infected_app.exe' // Fake location sent from backend!
-        }); 
-    }, 2000);
 });
 
-// --- STAGE 2: Resolve Threat ---
+// --- STAGE 2: REAL RESOLVE THREAT ---
 ipcMain.on('resolve-threat', (event) => {
-    /* ⚠️ DANGER ZONE ⚠️
-    exec('powershell.exe -Command "Remove-MpThreat"', () => {
-        event.reply('threat-resolved', { success: true });
+    console.log("Starting real threat removal on VM...");
+    
+    exec('powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Remove-MpThreat"', 
+        (error, stdout, stderr) => {
+            if (error) {
+                console.log("Warning: Could not remove threat automatically:", error);
+            } else {
+                console.log("Threat neutralized.");
+            }
+            
+            // Notice we removed the { success: true } payload because our secure 
+            // window.electronAPI.onThreatResolved wrapper no longer expects it!
+            event.reply('threat-resolved'); 
     });
-    */
-    setTimeout(() => { event.reply('threat-resolved', { success: true }); }, 1500);
 });
-
-// --- STAGE 3: OS Updates Check ---
+// --- STAGE 3: REAL OS UPDATES CHECK ---
 ipcMain.on('start-stage-3-scan', (event) => {
-    /* ⚠️ DANGER ZONE ⚠️
-    // 1. Create the COM object to search for uninstalled updates.
-    // 2. Format the output into a JSON array containing the UpdateID and Title.
+    console.log("Starting real Stage 3 Update check on VM...");
+
     const psSearch = `
         $Session = New-Object -ComObject Microsoft.Update.Session; 
         $Searcher = $Session.CreateUpdateSearcher(); 
         $Result = $Searcher.Search("IsInstalled=0 and Type='Software'"); 
         $updates = @(); 
         foreach ($update in $Result.Updates) { 
-            $updates += @{ id = $update.Identity.UpdateID; name = $update.Title } 
+            # Note: Changed 'name' to 'title' to perfectly match your frontend HTML
+            $updates += @{ id = $update.Identity.UpdateID; title = $update.Title } 
         }; 
         Write-Output ($updates | ConvertTo-Json -Compress -Depth 2)
     `;
 
-    exec(`powershell.exe -NoProfile -Command "${psSearch}"`, { maxBuffer: 1024 * 1024 * 5 }, (error, stdout) => {
-        try {
-            if (!stdout.trim()) {
-                return event.reply('updates-resolved', { success: true }); // No updates found
+    exec(`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "${psSearch}"`, 
+        { maxBuffer: 1024 * 1024 * 10 }, 
+        (error, stdout, stderr) => {
+            if (error) {
+                console.log("Update Check Error:", error);
+                return event.reply('updates-resolved'); // Failsafe skip
             }
-            
-            const parsedUpdates = JSON.parse(stdout.trim());
-            // Ensure it's an array (if PowerShell returns a single object, wrap it)
-            const updatesArray = Array.isArray(parsedUpdates) ? parsedUpdates : [parsedUpdates];
-            
-            if (updatesArray.length > 0) {
-                event.reply('updates-found', { updates: updatesArray });
-            } else {
-                event.reply('updates-resolved', { success: true });
+
+            try {
+                if (!stdout.trim()) {
+                    console.log("No updates found.");
+                    return event.reply('updates-resolved');
+                }
+                
+                const parsedUpdates = JSON.parse(stdout.trim());
+                const updatesArray = Array.isArray(parsedUpdates) ? parsedUpdates : [parsedUpdates];
+                
+                if (updatesArray.length > 0) {
+                    // Send the raw array directly to match your frontend logic!
+                    event.reply('updates-found', updatesArray);
+                } else {
+                    event.reply('updates-resolved');
+                }
+            } catch (e) {
+                console.error("Failed to parse updates array", e);
+                event.reply('updates-resolved'); // Failsafe skip
             }
-        } catch (e) {
-            console.error("Failed to parse updates array", e);
-            event.reply('updates-resolved', { success: true }); // Failsafe
-        }
     });
-    */
-    
-    // 🟢 SAFE DEV MODE (Active)
-    setTimeout(() => { 
-        const mockUpdatesList = [
-            { id: 'KB5031455', name: 'Cumulative Update for Windows 11' },
-            { id: 'INTEL-SYS', name: 'Intel - System - 2.0.1.9' },
-            { id: 'KB5032541', name: 'Security Intelligence Update for Defender' }
-        ];
-        event.reply('updates-found', { updates: mockUpdatesList }); 
-    }, 2000);
 });
 
-// --- STAGE 3: Install Specific Updates ---
+// --- STAGE 3: REAL INSTALL UPDATES ---
 ipcMain.on('resolve-updates', (event, selectedUpdateIds) => {
-    console.log("Backend received command to install specific updates: ", selectedUpdateIds);
+    console.log("Installing specific updates on VM: ", selectedUpdateIds);
     
-    /* ⚠️ DANGER ZONE ⚠️
-    // Convert the JS array of IDs into a string PowerShell can use
     const idsString = selectedUpdateIds.join(',');
     
-    // 1. Create an empty UpdateCollection.
-    // 2. Loop through all updates. If the ID matches what the user selected, add it to the collection.
-    // 3. Download and Install the collection.
     const psInstall = `
         $TargetIDs = '${idsString}' -split ','; 
         $Session = New-Object -ComObject Microsoft.Update.Session; 
@@ -294,15 +295,15 @@ ipcMain.on('resolve-updates', (event, selectedUpdateIds) => {
         Write-Output 'DONE'
     `;
 
-    // Note: Actual Windows Updates can take 10+ minutes to download and install.
-    exec(`powershell.exe -NoProfile -Command "${psInstall}"`, { maxBuffer: 1024 * 1024 * 5 }, (error, stdout) => {
-        console.log("Update Installation Result:", stdout);
-        event.reply('updates-resolved', { success: true });
+    exec(`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "${psInstall}"`, 
+        { maxBuffer: 1024 * 1024 * 10 }, 
+        (error, stdout, stderr) => {
+            console.log("Update Installation Result:", stdout);
+            
+            // Notice we removed { success: true } because our secure bridge
+            // window.electronAPI.onUpdatesResolved no longer expects it!
+            event.reply('updates-resolved'); 
     });
-    */
-    
-    // 🟢 SAFE DEV MODE (Active)
-    setTimeout(() => { event.reply('updates-resolved', { success: true }); }, 2500);
 });
 
 ipcMain.on('request-pc-info', (event) => {
