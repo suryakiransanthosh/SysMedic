@@ -7,345 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* --- LOGIN SCREEN CSS --- */
-        .login-screen {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            width: 100vw;
-            background: #0f172a;
-        }
-        .login-card {
-            background: #1e293b;
-            padding: 40px;
-            border-radius: 12px;
-            border: 1px solid #334155;
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-        }
-        .login-logo {
-            color: #3b82f6;
-            font-size: 3rem;
-            margin-bottom: 10px;
-        }
-        .login-logo h2 {
-            color: white;
-            font-size: 1.5rem;
-            margin-top: 10px;
-            margin-bottom: 5px;
-        }
-        .login-card p {
-            color: #94a3b8;
-            margin-bottom: 30px;
-            font-size: 0.9rem;
-        }
-        .login-card .input-group {
-            position: relative;
-            margin-bottom: 20px;
-        }
-        .login-card .input-group i {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-        }
-        .login-card input {
-            width: 100%;
-            padding: 12px 12px 12px 45px;
-            background: #0f172a;
-            border: 1px solid #334155;
-            border-radius: 8px;
-            color: white;
-            font-size: 1rem;
-            box-sizing: border-box;
-            outline: none;
-        }
-        .login-card input:focus {
-            border-color: #3b82f6;
-        }
-        .login-btn {
-            width: 100%;
-            padding: 12px;
-            background: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: 0.2s;
-            font-weight: 600;
-        }
-        .login-btn:hover {
-            background: #2563eb;
-        }
-
-        /* CSS FOR FILE UPLOADS & CHAT */
-        .input-wrapper {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            background: #1e293b;
-            border-radius: 12px;
-            padding: 5px;
-        }
-        .preview-area {
-            display: none;
-            padding: 10px;
-            border-bottom: 1px solid #334155;
-        }
-        .preview-thumb {
-            max-height: 80px;
-            border-radius: 8px;
-            border: 2px solid #3b82f6;
-        }
-        .input-controls {
-            display: flex;
-            align-items: center;
-            width: 100%;
-        }
-        .attach-btn {
-            background: none;
-            border: none;
-            color: #94a3b8;
-            font-size: 1.2rem;
-            cursor: pointer;
-            padding: 0 15px;
-            transition: color 0.3s;
-        }
-        .attach-btn:hover { color: #3b82f6; }
-        .input-controls input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: white;
-            padding: 15px;
-            outline: none;
-        }
-        .bubble img, .bubble video {
-            max-width: 100%;
-            border-radius: 8px;
-            margin-top: 10px;
-            border: 1px solid #475569;
-        }
-        .bubble {
-            white-space: pre-wrap; 
-            line-height: 1.5;
-        }
-        .bubble strong, .bubble b { font-weight: 700; color: #fff; }
-        .interactive-active {
-            border: 2px solid #10b981;
-            box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
-        }
-        .subguide-active {
-            border: 2px solid #f59e0b !important;
-            box-shadow: 0 0 10px rgba(245, 158, 11, 0.3) !important;
-        }
-
-        /* INFO TAB UI */
-        .info-container {
-            padding: 30px;
-            max-width: 1100px;
-        }
-        .info-header-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #fff;
-        }
-        .info-grid {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .info-card {
-            background: #242426; 
-            border-radius: 12px;
-            padding: 20px;
-            flex: 1;
-            min-width: 250px;
-            border: 1px solid #333;
-        }
-        .info-card.large {
-            flex: 2;
-            min-width: 400px;
-        }
-        .info-card-header {
-            display: flex;
-            justify-content: space-between;
-            color: #fff;
-            font-weight: 600;
-            margin-bottom: 25px;
-            font-size: 1rem;
-        }
-        .info-card-header i {
-            color: #888;
-            cursor: pointer;
-        }
-        .device-details {
-            display: flex;
-            align-items: center;
-            gap: 25px;
-        }
-        .device-icon {
-            font-size: 5rem;
-            color: #60a5fa;
-            padding: 10px;
-        }
-        .device-list {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        .device-row {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9rem;
-        }
-        .device-row .lbl { color: #a1a1aa; }
-        .device-row .val { color: #fff; display: flex; align-items: center; gap: 8px; font-family: monospace;}
-        .device-row .val i { color: #e2e8f0; cursor: pointer; transition: 0.2s;}
-        .device-row .val i:hover { color: #60a5fa; }
-        .copy-all {
-            text-align: right; 
-            color: #60a5fa; 
-            font-size: 0.9rem; 
-            margin-top: 10px; 
-            cursor: pointer;
-        }
-        .circle-wrap {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .circle-progress {
-            width: 140px;
-            height: 140px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-        }
-        .circle-inner {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: #242426; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .circle-inner i { font-size: 1.5rem; margin-bottom: 5px; }
-        .circle-inner span { font-size: 1.3rem; font-weight: bold; color: #fff; }
-        .circle-subtitle { color: #a1a1aa; font-size: 0.85rem; }
-        .bat-prog { background: conic-gradient(#3b82f6 47%, #3f3f46 0); }
-        .bat-prog i { color: #3b82f6; }
-        .hdd-prog { background: conic-gradient(#10b981 65%, #3f3f46 0); }
-        .hdd-prog i { color: #10b981; }
-
-        /* SETTINGS / ACCOUNT TAB UI */
-        .settings-group {
-            background: #1e293b;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            padding: 5px 10px;
-            max-width: 800px;
-        }
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            color: #e2e8f0;
-            cursor: pointer;
-            transition: background 0.2s;
-            border-bottom: 1px solid #334155;
-        }
-        .setting-item:last-child { border-bottom: none; }
-        .setting-item:hover {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 8px;
-        }
-        .setting-item i.setting-icon {
-            width: 30px;
-            color: #94a3b8;
-            text-align: center;
-            margin-right: 10px;
-        }
-        .setting-item .setting-value {
-            color: #94a3b8;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .color-circle {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #10b981;
-        }
-        
-        .logout-btn {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            transition: background 0.2s;
-            margin-top: 20px;
-        }
-        .logout-btn:hover { background: #dc2626; }
-        
-        /* CUSTOMER SUPPORT TICKET UI */
-        .ticket-container {
-            padding: 20px;
-            max-width: 800px;
-        }
-        .ticket-box {
-            background: #1e293b;
-            border: 1px solid #334155;
-            border-radius: 12px;
-            padding: 25px;
-            color: #e2e8f0;
-            white-space: pre-wrap;
-            font-family: monospace;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            min-height: 300px;
-        }
-        .btn-primary {
-            background: #3b82f6;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: background 0.2s;
-            font-weight: bold;
-        }
-        .btn-primary:hover { background: #2563eb; }
-        .btn-primary:disabled { background: #475569; cursor: not-allowed; }
-        .btn-success { background: #10b981; }
-        .btn-success:hover { background: #059669; }
-
-        .hidden { display: none !important; }
+     
     </style>
 </head>
 <body>
@@ -520,96 +182,107 @@
 
         <section id="info" class="tab-pane hidden">
             <div class="info-container">
-                <div class="info-header-title">Home</div>
                 <div class="info-grid">
-                    <div class="info-card large">
+                    
+                    <div class="info-card">
                         <div class="info-card-header">
-                            <span id="dev-model-name">SysMedic X-Series 15</span>
-                            <i class="fa-solid fa-ellipsis"></i>
+                            <i class="fa-solid fa-id-card"></i> System Identity
                         </div>
-                        <div class="device-details">
-                            <div class="device-icon">
-                                <i class="fa-solid fa-laptop-code"></i>
-                            </div>
-                            <div class="device-list">
-                                <div class="device-row">
-                                    <span class="lbl">Serial number</span>
-                                    <span class="val"><span id="dev-serial">MP2NKCJB</span> <i class="fa-regular fa-copy"></i></span>
-                                </div>
-                                <div class="device-row">
-                                    <span class="lbl">Product number</span>
-                                    <span class="val"><span id="dev-prod">83GS0097IN</span> <i class="fa-regular fa-copy"></i></span>
-                                </div>
-                                <div class="device-row">
-                                    <span class="lbl">Bios version</span>
-                                    <span class="val"><span id="dev-bios">NECN47WW</span> <i class="fa-regular fa-copy"></i></span>
-                                </div>
-                                <div class="device-row">
-                                    <span class="lbl">Processor</span>
-                                    <span class="val"><span id="dev-cpu">Intel Core i7-13700H</span> <i class="fa-regular fa-copy"></i></span>
-                                </div>
-                                <div class="copy-all">Copy all <i class="fa-regular fa-copy" style="margin-left: 5px;"></i></div>
-                            </div>
+                        <div class="device-list">
+                            <div class="device-row"><span class="lbl">Manufacturer</span><span class="val" id="dev-manufacturer">Detecting...</span></div>
+                            <div class="device-row"><span class="lbl">PC Name</span><span class="val" id="dev-model-name">...</span></div>
+                            <div class="device-row"><span class="lbl">Serial ID</span><span class="val" id="dev-serial">...</span></div>
+                            <div class="device-row"><span class="lbl">Architecture</span><span class="val" id="dev-arch">...</span></div>
                         </div>
                     </div>
 
                     <div class="info-card">
                         <div class="info-card-header">
-                            <span>Battery</span>
-                            <i class="fa-solid fa-ellipsis"></i>
+                            <i class="fa-solid fa-network-wired"></i> Network & OS
                         </div>
-                        <div class="circle-wrap">
-                            <div class="circle-progress bat-prog" id="bat-ui-ring">
-                                <div class="circle-inner">
-                                    <i class="fa-solid fa-battery-half"></i>
-                                    <span id="dev-bat-percent">47%</span>
-                                </div>
-                            </div>
-                            <div class="circle-subtitle" id="dev-bat-time">1h 3min remaining</div>
+                        <div class="device-list">
+                            <div class="device-row"><span class="lbl">Local IP</span><span class="val" id="dev-ip">...</span></div>
+                            <div class="device-row"><span class="lbl">OS Platform</span><span class="val" id="dev-platform">...</span></div>
+                            <div class="device-row"><span class="lbl">System Uptime</span><span class="val" id="dev-uptime">...</span></div>
                         </div>
                     </div>
 
                     <div class="info-card">
                         <div class="info-card-header">
-                            <span>Local Disk (C:)</span>
-                            <i class="fa-solid fa-ellipsis"></i>
+                            <i class="fa-solid fa-microchip"></i> Processor Details
                         </div>
-                        <div class="circle-wrap">
-                            <div class="circle-progress hdd-prog" id="hdd-ui-ring">
-                                <div class="circle-inner">
-                                    <i class="fa-solid fa-hard-drive"></i>
-                                    <span id="dev-hdd-percent">65%</span>
-                                </div>
-                            </div>
-                            <div class="circle-subtitle" id="dev-hdd-text">332 GB used / 512 GB total</div>
+                        <div class="device-list">
+                            <div class="device-row"><span class="lbl">CPU Model</span><span class="val" id="dev-cpu">...</span></div>
+                            <div class="device-row"><span class="lbl">Total Cores</span><span class="val" id="dev-cores">...</span></div> 
+                            <div class="device-row"><span class="lbl">Installed RAM</span><span class="val" id="dev-ram">...</span></div>
+                            <div class="device-row"><span class="lbl">GPU Model</span><span class="val" id="dev-gpu">...</span></div>
+                            <div class="device-row"><span class="lbl">VRAM</span><span class="val" id="dev-vram">...</span></div>
+                            <div class="device-row"><span class="lbl">Total Storage</span><span class="val" id="dev-ssd">...</span></div>
                         </div>
                     </div>
+
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <i class="fa-solid fa-heart-pulse"></i> Resource Health
+                        </div>
+                        <div class="stat-circles">
+                            <div class="circle-wrap">
+                                <div class="circle-progress bat-prog" id="bat-ui-ring" style="width:100px; height:100px;">
+                                    <div class="circle-inner" style="width:85px; height:85px;">
+                                        <span id="dev-bat-percent" style="font-size:1rem;">...</span>
+                                    </div>
+                                </div>
+                                <span class="circle-subtitle" id="dev-bat-time">Detecting...</span>
+                            </div>
+                            <div class="circle-wrap">
+                                <div class="circle-progress hdd-prog" id="hdd-ui-ring" style="width:100px; height:100px;">
+                                    <div class="circle-inner" style="width:85px; height:85px;">
+                                        <span id="dev-hdd-percent" style="font-size:1rem;">...</span>
+                                    </div>
+                                </div>
+                                <span class="circle-subtitle" id="dev-hdd-text">Detecting...</span>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
-        </section>
+        </section>      
 
         <section id="support" class="tab-pane hidden">
-            <header class="top-bar">
-                <div>
-                    <h1>Customer Support Escalation</h1>
-                    <p class="subtitle">AI-assisted ticket generation for human agents</p>
-                </div>
-            </header>
-            <div class="ticket-container" style="text-align: center;">
-                <button class="btn-primary" id="btn-generate-ticket" onclick="generateSupportTicket()">
-                    <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Ticket Summary
-                </button>
-                
-                <div id="ticket-output" class="ticket-box hidden" style="margin-top: 20px;">
+            <div class="tab-container"> <header class="top-bar">
+                    <div>
+                        <h1>Support Escalation</h1>
+                        <p class="subtitle">Generate an AI-powered diagnostic report for human technicians</p>
                     </div>
-                
-                <button class="btn-primary btn-success hidden" id="btn-send-ticket" onclick="sendSupportTicket()" style="margin-top: 10px;">
-                    <i class="fa-solid fa-paper-plane"></i> Send Ticket to Agent
-                </button>
+                </header>
+
+                <div class="info-card" style="text-align: center;">
+                    <div class="info-card-header">
+                        <i class="fa-solid fa-ticket"></i> AI Ticket Generator
+                    </div>
+                    
+                    <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 25px;">
+                        SysMedic will analyze your system specs and recent chat history to create a professional technical brief.
+                    </p>
+
+                    <button class="btn-primary" id="btn-generate-ticket" onclick="generateSupportTicket()">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Ticket Summary
+                    </button>
+                    
+                    <div id="ticket-output" class="ticket-box hidden" style="text-align: left; margin-top: 25px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); padding: 20px; border-radius: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #60a5fa; white-space: pre-wrap;">
+                    </div>
+                    
+                    <button class="btn-primary btn-success hidden" id="btn-send-ticket" onclick="sendSupportTicket()" style="margin-top: 20px; width: 100%; background: var(--success);">
+                        <i class="fa-solid fa-paper-plane"></i> Dispatch to Support Team
+                    </button>
+                </div>
             </div>
         </section>
 
         <section id="settings" class="tab-pane hidden">
+            <div class="tab-container">
+                <div class="settings-wrapper">
             <header class="top-bar">
                 <div>
                     <h1>Settings</h1>
@@ -618,6 +291,13 @@
             </header>
             <div style="padding: 20px;">
                 <h3 style="color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 10px; margin-left: 5px;">Preferences</h3>
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <div><i class="fa-solid fa-envelope setting-icon"></i> Support Email</div>
+                        <input type="email" id="acc-email" value="admin@sysmedic.local" 
+                            style="background:transparent; border:none; color:var(--text-muted); text-align:right; outline:none;">
+                    </div>
+                </div>
                 <div class="settings-group">
                     <div class="setting-item">
                         <div><i class="fa-solid fa-language setting-icon"></i> Language</div>
@@ -661,9 +341,13 @@
                     </div>
                 </div>
             </div>
+            </div>
+            </div>
         </section>
 
         <section id="account" class="tab-pane hidden">
+            <div class="tab-container">
+                <div class="settings-wrapper">
             <header class="top-bar">
                 <div>
                     <h1>Account Management</h1>
@@ -671,7 +355,6 @@
                 </div>
             </header>
             <div style="padding: 20px;">
-                
                 <div class="info-card" style="margin-bottom: 30px; display: flex; align-items: center; gap: 20px;">
                     <div style="font-size: 3.5rem; color: #3b82f6; background: #1e293b; padding: 15px 25px; border-radius: 50%; border: 1px solid #334155;">
                         <i class="fa-solid fa-user-astronaut"></i>
@@ -713,8 +396,18 @@
                     <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
                 </button>
             </div>
+            </div>
+            </div>
         </section>
-
+        
+        <div class="app-footer">
+            <div class="footer-left">
+                <i class="fa-solid fa-shield-halved"></i> SysMedic Core v1.0.0
+            </div>
+            <div class="footer-right">
+                <span class="status-dot"></span> System Connected
+            </div>
+        </div>
     </main>
 
     <div id="permission-modal" class="modal-overlay hidden">
@@ -750,7 +443,20 @@
             switchTab('dashboard'); 
         }
     }
+    function togglePasswordVisibility() {
+    const passInput = document.getElementById('acc-app-pass');
+    const toggleIcon = document.getElementById('togglePass');
     
+    if (passInput.type === "password") {
+        passInput.type = "text";
+        toggleIcon.classList.replace('fa-eye', 'fa-eye-slash');
+        passInput.style.color = "var(--accent)"; // Highlight when visible
+    } else {
+        passInput.type = "password";
+        toggleIcon.classList.replace('fa-eye-slash', 'fa-eye');
+        passInput.style.color = "var(--text-muted)";
+    }
+}
     function handleLogout() {
         document.getElementById('login-username').value = "";
         document.getElementById('login-password').value = "";
@@ -760,11 +466,10 @@
 </script>
 
 <script>
-    const { ipcRenderer } = require('electron');
 
-    setInterval(() => { ipcRenderer.send('request-vitals'); }, 2000);
+    setInterval(() => { window.electronAPI.requestVitals(); }, 2000);
 
-    ipcRenderer.on('vitals-update', (event, data) => {
+    window.electronAPI.onVitalsUpdate((data) => {
         document.getElementById('cpu-val').innerText = data.cpu;
         document.getElementById('ram-val').innerText = data.ram;
         document.getElementById('temp-val').innerText = data.temp;
@@ -775,22 +480,88 @@
     
     function toggleSidebar() { document.getElementById('sidebar').classList.toggle('expanded'); }
 
-    function switchTab(tabId) {
+function switchTab(tabId) {
         document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
         
         const targetTab = document.getElementById(tabId);
-        if (targetTab) {
-            targetTab.classList.remove('hidden');
+        if (targetTab) targetTab.classList.remove('hidden');
+
+        // 👇 TRIGGER DATA REQUEST WHEN OPENING INFO TAB 👇
+        if (tabId === 'info') {
+            window.electronAPI.requestPcInfo();
         }
         
-        if (event && event.currentTarget) {
-            event.currentTarget.classList.add('active');
-        } else {
-            document.querySelector(`button[onclick="switchTab('${tabId}')"]`).classList.add('active');
-        }
+        // This ensures the sidebar button stays highlighted
+        const navBtn = document.querySelector(`button[onclick="switchTab('${tabId}')"]`);
+        if (navBtn) navBtn.classList.add('active');
     }
-    
+
+            async function updateBatteryUI() {
+            if (!navigator.getBattery) return;
+            try {
+                const battery = await navigator.getBattery();
+                const percent = Math.round(battery.level * 100);
+                
+                // Safety check: only update if the ID exists
+                const percentEl = document.getElementById('dev-bat-percent');
+                const ringEl = document.getElementById('bat-ui-ring');
+                const timeEl = document.getElementById('dev-bat-time');
+
+                if (percentEl) percentEl.innerText = percent + "%";
+                if (ringEl) ringEl.style.background = `conic-gradient(#3b82f6 ${percent}%, #3f3f46 0)`;
+                
+                if (timeEl) {
+                    const time = battery.dischargingTime;
+                    timeEl.innerText = isFinite(time) ? 
+                        `${Math.round(time / 60)} min remaining` : "Plugged In";
+                }
+            } catch (err) {
+                console.warn("Battery API error:", err);
+            }
+        }
+
+        // Ensure hardware data fills correctly
+        window.electronAPI.onPcInfoData((data) => {
+            const setVal = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = val || "N/A";
+            };
+
+            // Identity Card
+            setVal('dev-manufacturer', data.manufacturer);
+            setVal('dev-model-name', data.model);
+            setVal('dev-serial', data.serial); // Now uses the simulated Serial ID
+            setVal('dev-arch', data.arch);
+
+            // Network & OS Card
+            setVal('dev-ip', data.ip);
+            setVal('dev-platform', data.platform); // Correctly fills OS Platform
+            setVal('dev-uptime', data.uptime);
+
+            // Hardware Card
+            setVal('dev-cpu', data.processor);
+            setVal('dev-cores', data.cores);
+            setVal('dev-ram', data.ram);
+            setVal('dev-gpu', data.gpu);
+            setVal('dev-vram', data.vram);
+            setVal('dev-ssd', data.ssd); // Fills Total Storage
+
+            // Update Disk Usage Ring
+            const hddRing = document.getElementById('hdd-ui-ring');
+            const hddPercentTxt = document.getElementById('dev-hdd-percent');
+            if (hddRing && data.ssd !== "Detecting...") {
+                const total = parseInt(data.ssd);
+                const used = data.ssdUsed || 0;
+                const percent = total > 0 ? Math.round((used / total) * 100) : 0;
+                
+                if (hddPercentTxt) hddPercentTxt.innerText = percent + "%";
+                hddRing.style.background = `conic-gradient(#10b981 ${percent}%, #3f3f46 0)`;
+                setVal('dev-hdd-text', `${used} GB used / ${total} GB total`);
+            }
+            updateBatteryUI();
+        });
+
     function showPlaceholder(feature) { alert(`${feature} feature coming soon!`); }
 
     // Heal Logic
@@ -804,39 +575,49 @@
         for(let i=1; i<=3; i++) updateStageUI(i, 'Waiting...', 'pending');
 
         updateStageUI(1, 'Initializing basic fixes...', 'active');
-        ipcRenderer.send('start-stage-1');
+        window.electronAPI.startStage1();
     }    
 
-    ipcRenderer.on('stage-1-progress', (event, stepText) => { updateStageUI(1, stepText, 'active'); });
+    window.electronAPI.onStage1Progress((stepText) => {  updateStageUI(1, stepText, 'active'); });
 
-    ipcRenderer.on('stage-1-complete', (event, response) => {
+    window.electronAPI.onStage1Complete(() => {
         updateStageUI(1, 'All basic services restored', 'completed');
         updateStageUI(2, 'Scanning files...', 'active');
-        ipcRenderer.send('start-stage-2-scan'); 
+        
+        // Trigger the next secure bridge call
+        window.electronAPI.startStage2Scan(); 
     });
 
-    ipcRenderer.on('threat-detected', (event, data) => {
+    // --- SECURE STAGE 2 & 3 LOGIC ---
+
+    // 1. Listen for a threat discovery
+    window.electronAPI.onThreatDetected((data) => {
         updateStageUI(2, 'ACTION REQUIRED: Threat found!', 'warning');
         scanPausedAtStage = 2; 
         showModal("Threat Detected", `Windows Defender found '${data.threatName}' at location:\n${data.threatLocation}\n\nDo you want SysMedic to quarantine it safely?`);
     });
 
-    ipcRenderer.on('scan-2-clean', (event) => {
+    // 2. Listen for a clean scan result
+    window.electronAPI.onScan2Clean(() => {
         updateStageUI(2, 'No threats detected', 'completed');
         resumeScanToStage3(); 
     });
 
-    ipcRenderer.on('threat-resolved', (event, response) => {
+    // 3. Listen for a successful threat removal
+    window.electronAPI.onThreatResolved(() => {
         updateStageUI(2, 'Threat removed successfully', 'completed');
         resumeScanToStage3();
     });
 
+    // 4. Securely transition to Stage 3
     function resumeScanToStage3() {
         updateStageUI(3, 'Checking for updates...', 'active');
-        ipcRenderer.send('start-stage-3-scan');
+        
+        // Use the secure bridge to trigger the next scan
+        window.electronAPI.startStage3Scan();
     }
 
-    ipcRenderer.on('updates-found', (event, data) => {
+    window.electronAPI.onUpdatesFound((data) => {
         updateStageUI(3, 'ACTION REQUIRED: Updates available!', 'warning');
         scanPausedAtStage = 3; 
         
@@ -858,7 +639,7 @@
         showModal("System Updates Available", "Please select the updates you want to install:");
     });
 
-    ipcRenderer.on('updates-resolved', (event) => {
+    window.electronAPI.onUpdatesResolved(() => {
         updateStageUI(3, 'System is up to date', 'completed');
         finishScan();
     });
@@ -876,7 +657,7 @@
         if (scanPausedAtStage === 2) {
             if (isApproved) {
                 updateStageUI(2, 'Quarantining threat...', 'active');
-                ipcRenderer.send('resolve-threat'); 
+                window.electronAPI.resolveThreat();
             } else {
                 updateStageUI(2, 'Ignored by user', 'completed');
                 resumeScanToStage3();
@@ -891,7 +672,7 @@
                     return;
                 }
                 updateStageUI(3, `Installing ${selectedIds.length} update(s)...`, 'active');
-                ipcRenderer.send('resolve-updates', selectedIds); 
+                window.electronAPI.resolveUpdates(selectedIds);
             } else {
                 updateStageUI(3, 'Update skipped by user', 'completed');
                 finishScan();
@@ -924,21 +705,22 @@
 </script>
 
 <script>
-    let API_KEY = "MISSING_KEY";
-    try {
-        const keyArg = process.argv.find(arg => arg.startsWith('--api-key='));
-        if (keyArg) {
-            API_KEY = keyArg.split('=')[1];
-        } else {
-            console.warn("⚠️ SysMedic Warning: API Key argument not found!");
-        }
-    } catch (error) {
-        console.error("⚠️ SysMedic Error reading process.argv:", error);
-    }
+    let API_KEY = window.electronAPI.getApiKey();
     
     let workingModelName = null;
     let currentAttachment = null; 
     let conversationHistory = [];
+
+    let recentSystemLogs = "Logs not yet loaded.";
+
+    // Request the logs from the backend as soon as the app loads using the secure bridge
+    window.electronAPI.requestSystemLogs();
+
+    // Save them when the backend replies
+    window.electronAPI.onSystemLogsData((logs) => {
+        recentSystemLogs = logs;
+        console.log("Fetched Windows Logs for AI:", recentSystemLogs);
+    });
 
     let guideStack = []; 
     let stepTimer = null;
@@ -1125,9 +907,13 @@
 
             if (conversationHistory.length === 0) {
                  userParts.push({ text: `
-                    You are SysMedic. 
+                    You are SysMedic, an expert IT diagnostic AI. 
+                    
+                    CURRENT WINDOWS SYSTEM ERRORS (Context):
+                    ${recentSystemLogs}
+
                     Protocol:
-                    1. When reporting problem: Explain + Bullet Points.
+                    1. When reporting a problem: Explain + Bullet Points. Use the provided System Errors if they seem relevant to the user's issue.
                     2. ALWAYS END WITH: "||Can I lead you to solve the issue?||"
                     
                     Interactive Guide:
@@ -1135,8 +921,8 @@
                     $$STEPS_START$$["Step 1", "Step 2"]$$STEPS_END$$
 
                     Nested Detour Protocol:
-                    If the user is ALREADY inside a guide but reports a NEW error (e.g., "I can't find the button"), 
-                    generate a JSON for a SUB-GUIDE for that specific small problem:
+                    If the user is ALREADY inside a guide but reports a NEW error, 
+                    generate a JSON for a SUB-GUIDE:
                     $$STEPS_START$$["Sub-Step 1", "Sub-Step 2"]$$STEPS_END$$
                 `});
             }
@@ -1213,111 +999,125 @@
 
     // --- TICKET GENERATION LOGIC ---
     async function generateSupportTicket() {
-        const btn = document.getElementById('btn-generate-ticket');
-        const outputBox = document.getElementById('ticket-output');
-        const sendBtn = document.getElementById('btn-send-ticket');
+    const btn = document.getElementById('btn-generate-ticket');
+    const outputBox = document.getElementById('ticket-output');
+    const sendBtn = document.getElementById('btn-send-ticket');
 
-        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Generating AI Summary...';
-        btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Analyzing Diagnostics...';
+    btn.disabled = true;
 
-        try {
-            // 1. Grab System Info directly from UI
-            const sysOS = document.getElementById('dev-os-name') ? document.getElementById('dev-os-name').innerText : 'Windows 11 Pro';
-            const sysCPU = document.getElementById('dev-cpu') ? document.getElementById('dev-cpu').innerText : 'Intel Core i7-13700H';
-            const sysRAM = document.getElementById('ram-val') ? document.getElementById('ram-val').innerText : '16 GB';
+    try {
+        // 1. UPDATED: Pull system info using the new IDs
+        const sysOS = document.getElementById('dev-platform')?.innerText || 'Windows 11';
+        const sysCPU = document.getElementById('dev-cpu')?.innerText || 'Unknown Processor';
+        const sysRAM = document.getElementById('dev-ram')?.innerText || 'Unknown RAM';
 
-            // 2. Grab Chat History (Extracting just the text)
-            let chatLogText = "";
-            if (conversationHistory.length === 0) {
-                chatLogText = "No previous chat history recorded.";
-            } else {
-                conversationHistory.forEach(msg => {
-                    // Skip system prompt at index 0
-                    if (msg.parts[0].text.includes("You are SysMedic")) return; 
-                    const role = msg.role === 'user' ? 'USER' : 'AI';
-                    chatLogText += `[${role}]: ${msg.parts[0].text}\n`;
-                });
-            }
+        // 2. Chat Log Extraction (Unchanged)
+        let chatLogText = conversationHistory.length === 0 ? 
+            "No previous chat history recorded." : 
+            conversationHistory.map(msg => `[${msg.role.toUpperCase()}]: ${msg.parts[0].text}`).join('\n');
 
-            // 3. Ask AI to summarize
-            const modelName = await getValidModel();
-            const url = `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${API_KEY}`;
+        // 3. Request Gemini Summary
+        const modelName = await getValidModel();
+        const url = `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${API_KEY}`;
+        
+        const prompt = `
+            You are a technical support summarizer. Create a professional IT support ticket.
+            System Info: OS: ${sysOS}, CPU: ${sysCPU}, RAM: ${sysRAM}
             
-            const prompt = `
-            You are a technical support summarizer. 
-            Create a professional IT support ticket based on the following data.
-            Do NOT use markdown like ** or #. Use plain text formatting.
-            
-            System Info:
-            OS: ${sysOS}
-            CPU: ${sysCPU}
-            RAM: ${sysRAM}
+            RECENT SYSTEM ERRORS:
+            ${recentSystemLogs}
 
-            Recent Chat Log:
+            Recent Chat Log: 
             ${chatLogText}
 
-            Format the output strictly as:
-            TICKET ID: [Generate a random 6 character alphanumeric string]
+            Format strictly as:
+            TICKET ID: SYSM-${Math.random().toString(36).substr(2, 6).toUpperCase()}
             TIMESTAMP: ${new Date().toLocaleString()}
-            
-            USER SYSTEM SPECS:
-            [Insert Specs]
+            ISSUE: [1 paragraph summary of the user's problem]
+            LOG ANALYSIS: [Briefly mention if any of the Recent System Errors explain the issue]
+            AI-STEPS: [What the user already tried in the chat]
+            ADVICE: [Next steps for a human agent]
+        `;
 
-            ISSUE SUMMARY:
-            [1 paragraph summary of the user's problem]
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] })
+        });
 
-            STEPS ALREADY ATTEMPTED BY AI:
-            [List what the AI told the user to do]
+        if (!response.ok) throw new Error("AI Busy. Please try again in a moment.");
 
-            RECOMMENDED ACTION FOR HUMAN AGENT:
-            [What should the human do next?]
-            `;
+        const data = await response.json();
+        const ticketText = data.candidates[0].content.parts[0].text;
 
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] })
-            });
+        outputBox.innerText = ticketText;
+        outputBox.classList.remove('hidden');
+        sendBtn.classList.remove('hidden');
+        btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Regenerate Ticket';
+        btn.disabled = false;
 
-            if (!response.ok) throw new Error("API Limit reached. Please wait a minute.");
-
-            const data = await response.json();
-            const ticketText = data.candidates[0].content.parts[0].text;
-
-            // Display the ticket
-            outputBox.innerText = ticketText;
-            outputBox.classList.remove('hidden');
-            sendBtn.classList.remove('hidden');
-
-            btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Regenerate Ticket';
-            btn.disabled = false;
-
-        } catch (error) {
-            btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Generate Ticket Summary';
-            btn.disabled = false;
-            alert("Failed to generate ticket: " + error.message);
-        }
+    } catch (error) {
+        btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Generate Ticket Summary';
+        btn.disabled = false;
+        alert("Failed to generate ticket: " + error.message);
     }
+}
 
-    function sendSupportTicket() {
-        const sendBtn = document.getElementById('btn-send-ticket');
-        sendBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending via API...';
-        sendBtn.disabled = true;
+function sendSupportTicket() {
+    // 1. Grab Electron's shell module to open native apps
+    const { shell } = require('electron'); 
+    
+    // 2. Get the generated ticket and manufacturer
+    const ticketText = document.getElementById('ticket-output').innerText;
+    const manufacturer = document.getElementById('dev-manufacturer')?.innerText || 'Unknown'; 
 
-        // Simulate sending to Developer B's backend
-        setTimeout(() => {
-            sendBtn.innerHTML = '<i class="fa-solid fa-check"></i> Ticket Sent Successfully!';
-            sendBtn.style.background = "#059669";
-            setTimeout(() => {
-                sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Ticket to Agent';
-                sendBtn.style.background = "";
-                sendBtn.disabled = false;
-                document.getElementById('ticket-output').classList.add('hidden');
-                sendBtn.classList.add('hidden');
-                document.getElementById('btn-generate-ticket').innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Generate Ticket Summary';
-            }, 3000);
-        }, 1500);
-    }
+    // 3. Define the routing directory
+    const supportDirectory = {
+        'Lenovo': 'support@lenovo.com',
+        'Dell Inc.': 'support@dell.com',
+        'HP': 'support@hp.com'
+    };
+    
+    // Determine the email, fallback to a local one if manufacturer isn't in the list
+    const targetEmail = supportDirectory[manufacturer] || 'general-support@sysmedic.local';
+
+    // 4. Format the email subject and body for a URL
+    const subject = encodeURIComponent(`SysMedic Diagnostic Report - ${manufacturer}`);
+    const body = encodeURIComponent(ticketText);
+
+    // 5. Instantly open Windows Mail / Outlook with everything pre-filled
+    shell.openExternal(`mailto:${targetEmail}?subject=${subject}&body=${body}`);
+    
+    // 6. Update the button UI to show it worked
+    const sendBtn = document.getElementById('btn-send-ticket');
+    sendBtn.innerHTML = '<i class="fa-solid fa-check"></i> Opened in Mail Client';
+    sendBtn.style.background = "var(--success)";
+    
+    // Reset the button after 4 seconds
+    setTimeout(() => {
+        sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Dispatch to Support Team';
+        sendBtn.style.background = "var(--accent)";
+        sendBtn.disabled = false;
+    }, 4000);
+}
+// Listen for the result from the backend
+// window.electronAPI.onEmailSentStatus((result) => {
+//     const sendBtn = document.getElementById('btn-send-ticket');
+//     if (result.success) {
+//         sendBtn.innerHTML = '<i class="fa-solid fa-check"></i> Dispatched to Manufacturer!';
+//         sendBtn.style.background = "var(--success)";
+        
+//         setTimeout(() => {
+//             sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Dispatch to Support Team';
+//             sendBtn.disabled = false;
+//         }, 4000);
+//     } else {
+//         sendBtn.innerHTML = '<i class="fa-solid fa-xmark"></i> Delivery Failed';
+//         sendBtn.style.background = "var(--danger)";
+//         sendBtn.disabled = false;
+//     }
+// });
 </script>
 
 </body>
