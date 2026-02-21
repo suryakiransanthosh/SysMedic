@@ -4,7 +4,7 @@ const os = require('os'); // Node's built-in hardware reader
 const path = require('path');
 
 // 1. Load the secret .env file
-require('dotenv').config(); 
+require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 // New PowerShell query that includes Manufacturer
 const psCommand = `
@@ -81,7 +81,7 @@ function createWindow() {
     win.removeMenu();
     win.loadFile('index.html');
 
-    win.webContents.openDevTools();
+    // win.webContents.openDevTools();
 }
 
 app.whenReady().then(createWindow);
@@ -174,12 +174,12 @@ ipcMain.on('start-stage-2-scan', (event) => {
             Write-Output "CLEAN" 
         }
     `;
-    
-    // Increased buffer and added execution bypass for safety
-    exec(`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "${psCommand}"`, 
+    const encodedCmd = Buffer.from(psCommand, 'utf16le').toString('base64');
+
+    // Execute using the -EncodedCommand flag
+    exec(`powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand ${encodedCmd}`, 
         { maxBuffer: 1024 * 1024 * 10 }, 
         (error, stdout, stderr) => {
-            
             if (error && !stdout) {
                 console.log("Scan execution error:", error);
                 event.reply('threat-detected', { 
@@ -208,16 +208,31 @@ ipcMain.on('start-stage-2-scan', (event) => {
 ipcMain.on('resolve-threat', (event) => {
     console.log("Starting real threat removal on VM...");
     
-    exec('powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "Remove-MpThreat"', 
+    // 1. The robust PowerShell script
+    const psCommand = `
+        try {
+            Remove-MpThreat -ErrorAction Stop
+            Write-Output "NEUTRALIZED"
+        } catch {
+            Write-Output "FAILED: $($_.Exception.Message)"
+        }
+    `;
+
+    // 2. Encode to Base64 to bypass string-parsing blocks
+    const encodedCmd = Buffer.from(psCommand, 'utf16le').toString('base64');
+
+    // 3. Execute securely
+    exec(`powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand ${encodedCmd}`, 
         (error, stdout, stderr) => {
-            if (error) {
-                console.log("Warning: Could not remove threat automatically:", error);
+            const output = stdout ? stdout.trim() : "";
+            
+            if (error || output.includes("FAILED")) {
+                console.log("Warning: Could not remove threat automatically:", error || output);
             } else {
-                console.log("Threat neutralized.");
+                console.log("Threat neutralized securely.");
             }
             
-            // Notice we removed the { success: true } payload because our secure 
-            // window.electronAPI.onThreatResolved wrapper no longer expects it!
+            // Unblock the UI regardless of background success/failure
             event.reply('threat-resolved'); 
     });
 });
@@ -231,38 +246,44 @@ ipcMain.on('start-stage-3-scan', (event) => {
         $Result = $Searcher.Search("IsInstalled=0 and Type='Software'"); 
         $updates = @(); 
         foreach ($update in $Result.Updates) { 
-            # Note: Changed 'name' to 'title' to perfectly match your frontend HTML
             $updates += @{ id = $update.Identity.UpdateID; title = $update.Title } 
         }; 
-        Write-Output ($updates | ConvertTo-Json -Compress -Depth 2)
+        if ($updates.Count -gt 0) {
+            Write-Output (ConvertTo-Json -InputObject @($updates) -Compress)
+        } else {
+            Write-Output "[]"
+        }
     `;
 
-    exec(`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "${psSearch}"`, 
+    const encodedSearch = Buffer.from(psSearch, 'utf16le').toString('base64');
+
+    exec(`powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand ${encodedSearch}`, 
         { maxBuffer: 1024 * 1024 * 10 }, 
         (error, stdout, stderr) => {
             if (error) {
                 console.log("Update Check Error:", error);
-                return event.reply('updates-resolved'); // Failsafe skip
+                return event.reply('updates-resolved');
             }
-
             try {
-                if (!stdout.trim()) {
-                    console.log("No updates found.");
-                    return event.reply('updates-resolved');
+                const resultText = stdout ? stdout.trim() : "[]";
+                const parsedUpdates = JSON.parse(resultText);
+                
+                // BULLETPROOF: Force it into a valid Array no matter what PowerShell returns
+                let updatesArray = [];
+                if (Array.isArray(parsedUpdates)) {
+                    updatesArray = parsedUpdates;
+                } else if (parsedUpdates && parsedUpdates.id) {
+                    updatesArray = [parsedUpdates];
                 }
-                
-                const parsedUpdates = JSON.parse(stdout.trim());
-                const updatesArray = Array.isArray(parsedUpdates) ? parsedUpdates : [parsedUpdates];
-                
+
                 if (updatesArray.length > 0) {
-                    // Send the raw array directly to match your frontend logic!
                     event.reply('updates-found', updatesArray);
                 } else {
                     event.reply('updates-resolved');
                 }
             } catch (e) {
                 console.error("Failed to parse updates array", e);
-                event.reply('updates-resolved'); // Failsafe skip
+                event.reply('updates-resolved');
             }
     });
 });
@@ -295,7 +316,9 @@ ipcMain.on('resolve-updates', (event, selectedUpdateIds) => {
         Write-Output 'DONE'
     `;
 
-    exec(`powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "${psInstall}"`, 
+    const encodedInstall = Buffer.from(psInstall, 'utf16le').toString('base64');
+
+    exec(`powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand ${encodedInstall}`, 
         { maxBuffer: 1024 * 1024 * 10 }, 
         (error, stdout, stderr) => {
             console.log("Update Installation Result:", stdout);
