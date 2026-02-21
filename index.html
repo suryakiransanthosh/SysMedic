@@ -7,7 +7,83 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* CSS FOR FILE UPLOADS */
+        /* --- LOGIN SCREEN CSS --- */
+        .login-screen {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            background: #0f172a;
+        }
+        .login-card {
+            background: #1e293b;
+            padding: 40px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .login-logo {
+            color: #3b82f6;
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+        .login-logo h2 {
+            color: white;
+            font-size: 1.5rem;
+            margin-top: 10px;
+            margin-bottom: 5px;
+        }
+        .login-card p {
+            color: #94a3b8;
+            margin-bottom: 30px;
+            font-size: 0.9rem;
+        }
+        .login-card .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .login-card .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+        .login-card input {
+            width: 100%;
+            padding: 12px 12px 12px 45px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: white;
+            font-size: 1rem;
+            box-sizing: border-box;
+            outline: none;
+        }
+        .login-card input:focus {
+            border-color: #3b82f6;
+        }
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 600;
+        }
+        .login-btn:hover {
+            background: #2563eb;
+        }
+
+        /* CSS FOR FILE UPLOADS & CHAT */
         .input-wrapper {
             display: flex;
             flex-direction: column;
@@ -16,25 +92,21 @@
             border-radius: 12px;
             padding: 5px;
         }
-
         .preview-area {
-            display: none; /* Hidden by default */
+            display: none;
             padding: 10px;
             border-bottom: 1px solid #334155;
         }
-
         .preview-thumb {
             max-height: 80px;
             border-radius: 8px;
             border: 2px solid #3b82f6;
         }
-
         .input-controls {
             display: flex;
             align-items: center;
             width: 100%;
         }
-
         .attach-btn {
             background: none;
             border: none;
@@ -44,9 +116,7 @@
             padding: 0 15px;
             transition: color 0.3s;
         }
-
         .attach-btn:hover { color: #3b82f6; }
-
         .input-controls input {
             flex: 1;
             background: transparent;
@@ -55,37 +125,253 @@
             padding: 15px;
             outline: none;
         }
-
-        /* Chat bubble updates */
         .bubble img, .bubble video {
             max-width: 100%;
             border-radius: 8px;
             margin-top: 10px;
             border: 1px solid #475569;
         }
-        
         .bubble {
             white-space: pre-wrap; 
             line-height: 1.5;
         }
         .bubble strong, .bubble b { font-weight: 700; color: #fff; }
-        
-        /* Interactive Mode Highlight */
         .interactive-active {
             border: 2px solid #10b981;
             box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
         }
-        
-        /* Sub-Guide Highlight (Orange) */
         .subguide-active {
             border: 2px solid #f59e0b !important;
             box-shadow: 0 0 10px rgba(245, 158, 11, 0.3) !important;
         }
+
+        /* INFO TAB UI */
+        .info-container {
+            padding: 30px;
+            max-width: 1100px;
+        }
+        .info-header-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: #fff;
+        }
+        .info-grid {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .info-card {
+            background: #242426; 
+            border-radius: 12px;
+            padding: 20px;
+            flex: 1;
+            min-width: 250px;
+            border: 1px solid #333;
+        }
+        .info-card.large {
+            flex: 2;
+            min-width: 400px;
+        }
+        .info-card-header {
+            display: flex;
+            justify-content: space-between;
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 25px;
+            font-size: 1rem;
+        }
+        .info-card-header i {
+            color: #888;
+            cursor: pointer;
+        }
+        .device-details {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+        .device-icon {
+            font-size: 5rem;
+            color: #60a5fa;
+            padding: 10px;
+        }
+        .device-list {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .device-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+        .device-row .lbl { color: #a1a1aa; }
+        .device-row .val { color: #fff; display: flex; align-items: center; gap: 8px; font-family: monospace;}
+        .device-row .val i { color: #e2e8f0; cursor: pointer; transition: 0.2s;}
+        .device-row .val i:hover { color: #60a5fa; }
+        .copy-all {
+            text-align: right; 
+            color: #60a5fa; 
+            font-size: 0.9rem; 
+            margin-top: 10px; 
+            cursor: pointer;
+        }
+        .circle-wrap {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .circle-progress {
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        .circle-inner {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: #242426; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .circle-inner i { font-size: 1.5rem; margin-bottom: 5px; }
+        .circle-inner span { font-size: 1.3rem; font-weight: bold; color: #fff; }
+        .circle-subtitle { color: #a1a1aa; font-size: 0.85rem; }
+        .bat-prog { background: conic-gradient(#3b82f6 47%, #3f3f46 0); }
+        .bat-prog i { color: #3b82f6; }
+        .hdd-prog { background: conic-gradient(#10b981 65%, #3f3f46 0); }
+        .hdd-prog i { color: #10b981; }
+
+        /* SETTINGS / ACCOUNT TAB UI */
+        .settings-group {
+            background: #1e293b;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            padding: 5px 10px;
+            max-width: 800px;
+        }
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            color: #e2e8f0;
+            cursor: pointer;
+            transition: background 0.2s;
+            border-bottom: 1px solid #334155;
+        }
+        .setting-item:last-child { border-bottom: none; }
+        .setting-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        .setting-item i.setting-icon {
+            width: 30px;
+            color: #94a3b8;
+            text-align: center;
+            margin-right: 10px;
+        }
+        .setting-item .setting-value {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .color-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #10b981;
+        }
+        
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+            margin-top: 20px;
+        }
+        .logout-btn:hover { background: #dc2626; }
+        
+        /* CUSTOMER SUPPORT TICKET UI */
+        .ticket-container {
+            padding: 20px;
+            max-width: 800px;
+        }
+        .ticket-box {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 25px;
+            color: #e2e8f0;
+            white-space: pre-wrap;
+            font-family: monospace;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            min-height: 300px;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.2s;
+            font-weight: bold;
+        }
+        .btn-primary:hover { background: #2563eb; }
+        .btn-primary:disabled { background: #475569; cursor: not-allowed; }
+        .btn-success { background: #10b981; }
+        .btn-success:hover { background: #059669; }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-<div class="app-container">
+<div id="login-screen" class="login-screen">
+    <div class="login-card">
+        <div class="login-logo">
+            <i class="fa-solid fa-biohazard"></i>
+            <h2>SysMedic</h2>
+        </div>
+        <p>Intelligent Repair Core Authentication</p>
+        <form onsubmit="handleLogin(event)">
+            <div class="input-group">
+                <i class="fa-solid fa-user"></i>
+                <input type="text" id="login-username" placeholder="Username" required>
+            </div>
+            <div class="input-group">
+                <i class="fa-solid fa-lock"></i>
+                <input type="password" id="login-password" placeholder="Password" required>
+            </div>
+            <button type="submit" class="login-btn">Secure Login</button>
+        </form>
+    </div>
+</div>
+
+<div id="main-app" class="app-container hidden">
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <button class="toggle-btn" onclick="toggleSidebar()">
@@ -106,20 +392,20 @@
                 <i class="fa-solid fa-comments-dollar"></i>
                 <span class="nav-text">AI Chat</span>
             </button>
-            <button class="nav-item" onclick="showPlaceholder('Customer Support Ticket Generation')">
+            <button class="nav-item" onclick="switchTab('support')">
                 <i class="fa-solid fa-headset"></i>
                 <span class="nav-text">Customer Support</span>
             </button>
-            <button class="nav-item" onclick="showPlaceholder('Info about PC')">
+            <button class="nav-item" onclick="switchTab('info')">
                 <i class="fa-solid fa-circle-info"></i>
                 <span class="nav-text">Info about PC</span>
             </button>
             <div class="spacer"></div>
-            <button class="nav-item" onclick="showPlaceholder('Settings')">
+            <button class="nav-item" onclick="switchTab('settings')">
                 <i class="fa-solid fa-gear"></i>
                 <span class="nav-text">Settings</span>
             </button>
-            <button class="nav-item" onclick="showPlaceholder('Account Management')">
+            <button class="nav-item" onclick="switchTab('account')">
                 <i class="fa-solid fa-user-circle"></i>
                 <span class="nav-text">Account</span>
             </button>
@@ -219,19 +505,213 @@
 
                         <div class="input-controls">
                             <input type="file" id="file-input" accept="image/*,video/*" hidden onchange="handleFileSelect(event)">
-                            
                             <button class="attach-btn" onclick="document.getElementById('file-input').click()" title="Attach Image/Video">
                                 <i class="fa-solid fa-paperclip"></i>
                             </button>
-                            
                             <input type="text" id="user-input" placeholder="Type a message..." onkeypress="handleEnter(event)">
-                            
                             <button class="attach-btn" onclick="sendMessage()" style="color: #10b981;">
                                 <i class="fa-solid fa-paper-plane"></i>
                             </button>
                         </div>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <section id="info" class="tab-pane hidden">
+            <div class="info-container">
+                <div class="info-header-title">Home</div>
+                <div class="info-grid">
+                    <div class="info-card large">
+                        <div class="info-card-header">
+                            <span id="dev-model-name">SysMedic X-Series 15</span>
+                            <i class="fa-solid fa-ellipsis"></i>
+                        </div>
+                        <div class="device-details">
+                            <div class="device-icon">
+                                <i class="fa-solid fa-laptop-code"></i>
+                            </div>
+                            <div class="device-list">
+                                <div class="device-row">
+                                    <span class="lbl">Serial number</span>
+                                    <span class="val"><span id="dev-serial">MP2NKCJB</span> <i class="fa-regular fa-copy"></i></span>
+                                </div>
+                                <div class="device-row">
+                                    <span class="lbl">Product number</span>
+                                    <span class="val"><span id="dev-prod">83GS0097IN</span> <i class="fa-regular fa-copy"></i></span>
+                                </div>
+                                <div class="device-row">
+                                    <span class="lbl">Bios version</span>
+                                    <span class="val"><span id="dev-bios">NECN47WW</span> <i class="fa-regular fa-copy"></i></span>
+                                </div>
+                                <div class="device-row">
+                                    <span class="lbl">Processor</span>
+                                    <span class="val"><span id="dev-cpu">Intel Core i7-13700H</span> <i class="fa-regular fa-copy"></i></span>
+                                </div>
+                                <div class="copy-all">Copy all <i class="fa-regular fa-copy" style="margin-left: 5px;"></i></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <span>Battery</span>
+                            <i class="fa-solid fa-ellipsis"></i>
+                        </div>
+                        <div class="circle-wrap">
+                            <div class="circle-progress bat-prog" id="bat-ui-ring">
+                                <div class="circle-inner">
+                                    <i class="fa-solid fa-battery-half"></i>
+                                    <span id="dev-bat-percent">47%</span>
+                                </div>
+                            </div>
+                            <div class="circle-subtitle" id="dev-bat-time">1h 3min remaining</div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="info-card-header">
+                            <span>Local Disk (C:)</span>
+                            <i class="fa-solid fa-ellipsis"></i>
+                        </div>
+                        <div class="circle-wrap">
+                            <div class="circle-progress hdd-prog" id="hdd-ui-ring">
+                                <div class="circle-inner">
+                                    <i class="fa-solid fa-hard-drive"></i>
+                                    <span id="dev-hdd-percent">65%</span>
+                                </div>
+                            </div>
+                            <div class="circle-subtitle" id="dev-hdd-text">332 GB used / 512 GB total</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="support" class="tab-pane hidden">
+            <header class="top-bar">
+                <div>
+                    <h1>Customer Support Escalation</h1>
+                    <p class="subtitle">AI-assisted ticket generation for human agents</p>
+                </div>
+            </header>
+            <div class="ticket-container" style="text-align: center;">
+                <button class="btn-primary" id="btn-generate-ticket" onclick="generateSupportTicket()">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Ticket Summary
+                </button>
+                
+                <div id="ticket-output" class="ticket-box hidden" style="margin-top: 20px;">
+                    </div>
+                
+                <button class="btn-primary btn-success hidden" id="btn-send-ticket" onclick="sendSupportTicket()" style="margin-top: 10px;">
+                    <i class="fa-solid fa-paper-plane"></i> Send Ticket to Agent
+                </button>
+            </div>
+        </section>
+
+        <section id="settings" class="tab-pane hidden">
+            <header class="top-bar">
+                <div>
+                    <h1>Settings</h1>
+                    <p class="subtitle">Customize your SysMedic experience</p>
+                </div>
+            </header>
+            <div style="padding: 20px;">
+                <h3 style="color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 10px; margin-left: 5px;">Preferences</h3>
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <div><i class="fa-solid fa-language setting-icon"></i> Language</div>
+                        <div class="setting-value">English <i class="fa-solid fa-chevron-right"></i></div>
+                    </div>
+                    <div class="setting-item">
+                        <div><i class="fa-solid fa-globe setting-icon"></i> App Language</div>
+                        <div class="setting-value">System Default <i class="fa-solid fa-chevron-right"></i></div>
+                    </div>
+                    <div class="setting-item">
+                        <div><i class="fa-solid fa-moon setting-icon"></i> Theme</div>
+                        <div class="setting-value">Dark <i class="fa-solid fa-chevron-right"></i></div>
+                    </div>
+                    <div class="setting-item">
+                        <div><i class="fa-solid fa-palette setting-icon"></i> Accent Color</div>
+                        <div class="setting-value"><div class="color-circle"></div> <i class="fa-solid fa-chevron-right"></i></div>
+                    </div>
+                    <div class="setting-item">
+                        <div><i class="fa-solid fa-keyboard setting-icon"></i> Keyboard Shortcuts</div>
+                        <div class="setting-value"><i class="fa-solid fa-chevron-right"></i></div>
+                    </div>
+                </div>
+
+                <h3 style="color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 10px; margin-left: 5px; margin-top: 30px;">About & Support</h3>
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <div><i class="fa-solid fa-bug setting-icon"></i> Report a Bug</div>
+                        <div class="setting-value"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+                    </div>
+                    <div class="setting-item">
+                        <div><i class="fa-solid fa-circle-question setting-icon"></i> Help Center</div>
+                        <div class="setting-value"><i class="fa-solid fa-arrow-up-right-from-square"></i></div>
+                    </div>
+                    <div class="setting-item">
+                        <div><i class="fa-solid fa-file-contract setting-icon"></i> Terms of Use</div>
+                        <div class="setting-value"><i class="fa-solid fa-chevron-right"></i></div>
+                    </div>
+                    <div class="setting-item">
+                        <div><i class="fa-solid fa-shield-halved setting-icon"></i> Privacy Policy</div>
+                        <div class="setting-value"><i class="fa-solid fa-chevron-right"></i></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="account" class="tab-pane hidden">
+            <header class="top-bar">
+                <div>
+                    <h1>Account Management</h1>
+                    <p class="subtitle">Manage your profile and security parameters</p>
+                </div>
+            </header>
+            <div style="padding: 20px;">
+                
+                <div class="info-card" style="margin-bottom: 30px; display: flex; align-items: center; gap: 20px;">
+                    <div style="font-size: 3.5rem; color: #3b82f6; background: #1e293b; padding: 15px 25px; border-radius: 50%; border: 1px solid #334155;">
+                        <i class="fa-solid fa-user-astronaut"></i>
+                    </div>
+                    <div>
+                        <h2 style="color: white; margin: 0 0 5px 0;">Administrator</h2>
+                        <p style="color: #94a3b8; margin: 0 0 10px 0;">admin@sysmedic.local</p>
+                    </div>
+                </div>
+
+                <h3 style="color: #94a3b8; font-size: 0.9rem; text-transform: uppercase; margin-bottom: 10px; margin-left: 5px;">Security & Details</h3>
+                <div class="settings-group">
+                    <div class="setting-item">
+                        <div><i class="fa-solid fa-envelope setting-icon"></i> Email Address</div>
+                        <div class="setting-value">admin@sysmedic.local <i class="fa-solid fa-chevron-right"></i></div>
+                    </div>
+                    <div class="setting-item">
+                        <div><i class="fa-solid fa-key setting-icon"></i> Change Password</div>
+                        <div class="setting-value">Updated 2 days ago <i class="fa-solid fa-chevron-right"></i></div>
+                    </div>
+                    <div class="setting-item">
+                        <div><i class="fa-solid fa-shield-check setting-icon"></i> Two-Factor Authentication</div>
+                        <div class="setting-value" style="color: #10b981;">Enabled <i class="fa-solid fa-chevron-right"></i></div>
+                    </div>
+                    <div class="setting-item">
+                        <div><i class="fa-solid fa-id-card setting-icon"></i> License Key</div>
+                        <div class="setting-value">XXXX-XXXX-XXXX-1234 <i class="fa-regular fa-copy" style="cursor: pointer;" onclick="alert('License Copied')"></i></div>
+                    </div>
+                </div>
+
+                <div class="settings-group" style="border: 1px solid #7f1d1d; background: rgba(239, 68, 68, 0.05); margin-top: 30px;">
+                    <div class="setting-item" onclick="alert('Are you sure you want to delete this account? This action cannot be undone.')">
+                        <div><i class="fa-solid fa-trash setting-icon" style="color: #ef4444;"></i> Delete Account</div>
+                        <div class="setting-value"><i class="fa-solid fa-chevron-right" style="color: #ef4444;"></i></div>
+                    </div>
+                </div>
+
+                <button class="logout-btn" onclick="handleLogout()">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Sign Out
+                </button>
             </div>
         </section>
 
@@ -259,36 +739,56 @@
 </div>
 
 <script>
+    function handleLogin(e) {
+        e.preventDefault();
+        const username = document.getElementById('login-username').value;
+        const pass = document.getElementById('login-password').value;
+        
+        if (username && pass) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('main-app').classList.remove('hidden');
+            switchTab('dashboard'); 
+        }
+    }
+    
+    function handleLogout() {
+        document.getElementById('login-username').value = "";
+        document.getElementById('login-password').value = "";
+        document.getElementById('main-app').classList.add('hidden');
+        document.getElementById('login-screen').classList.remove('hidden');
+    }
+</script>
+
+<script>
     const { ipcRenderer } = require('electron');
 
-    // --- DASHBOARD VITALS LOGIC ---
-    setInterval(() => {
-        ipcRenderer.send('request-vitals');
-    }, 2000);
+    setInterval(() => { ipcRenderer.send('request-vitals'); }, 2000);
 
     ipcRenderer.on('vitals-update', (event, data) => {
         document.getElementById('cpu-val').innerText = data.cpu;
         document.getElementById('ram-val').innerText = data.ram;
         document.getElementById('temp-val').innerText = data.temp;
-
         const cpuNum = parseInt(data.cpu);
-        if (cpuNum > 80) {
-            document.getElementById('cpu-val').classList.add('warning');
-        } else {
-            document.getElementById('cpu-val').classList.remove('warning');
-        }
+        if (cpuNum > 80) document.getElementById('cpu-val').classList.add('warning');
+        else document.getElementById('cpu-val').classList.remove('warning');
     });
     
-    // --- SIDEBAR TOGGLE LOGIC ---
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('expanded');
-    }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('expanded'); }
 
     function switchTab(tabId) {
         document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
         document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-        document.getElementById(tabId).classList.remove('hidden');
-        event.currentTarget.classList.add('active');
+        
+        const targetTab = document.getElementById(tabId);
+        if (targetTab) {
+            targetTab.classList.remove('hidden');
+        }
+        
+        if (event && event.currentTarget) {
+            event.currentTarget.classList.add('active');
+        } else {
+            document.querySelector(`button[onclick="switchTab('${tabId}')"]`).classList.add('active');
+        }
     }
     
     function showPlaceholder(feature) { alert(`${feature} feature coming soon!`); }
@@ -303,21 +803,14 @@
         btn.disabled = true; 
         for(let i=1; i<=3; i++) updateStageUI(i, 'Waiting...', 'pending');
 
-        // Start Stage 1 (Text will be updated by the backend!)
         updateStageUI(1, 'Initializing basic fixes...', 'active');
         ipcRenderer.send('start-stage-1');
     }    
 
-    // NEW LISTENER: Stage 1 Live Progress
-    ipcRenderer.on('stage-1-progress', (event, stepText) => {
-        updateStageUI(1, stepText, 'active');
-    });
+    ipcRenderer.on('stage-1-progress', (event, stepText) => { updateStageUI(1, stepText, 'active'); });
 
-    // LISTENER: Stage 1 Done -> Start Stage 2
     ipcRenderer.on('stage-1-complete', (event, response) => {
         updateStageUI(1, 'All basic services restored', 'completed');
-        
-        // Start Stage 2
         updateStageUI(2, 'Scanning files...', 'active');
         ipcRenderer.send('start-stage-2-scan'); 
     });
@@ -325,11 +818,7 @@
     ipcRenderer.on('threat-detected', (event, data) => {
         updateStageUI(2, 'ACTION REQUIRED: Threat found!', 'warning');
         scanPausedAtStage = 2; 
-        
-        showModal(
-            "Threat Detected", 
-            `Windows Defender found '${data.threatName}' at location:\n${data.threatLocation}\n\nDo you want SysMedic to quarantine it safely?`
-        );
+        showModal("Threat Detected", `Windows Defender found '${data.threatName}' at location:\n${data.threatLocation}\n\nDo you want SysMedic to quarantine it safely?`);
     });
 
     ipcRenderer.on('scan-2-clean', (event) => {
@@ -362,7 +851,6 @@
             label.style.color = 'var(--text-main)';
             label.style.fontSize = '13px';
             label.style.cursor = 'pointer';
-            
             label.innerHTML = `<input type="checkbox" value="${upd.id}" checked class="update-cb" style="margin-right: 10px; accent-color: var(--accent);"> ${upd.name}`;
             checklistDiv.appendChild(label);
         });
@@ -375,7 +863,6 @@
         finishScan();
     });
 
-    // --- MODAL LOGIC ---
     function showModal(title, desc) {
         document.getElementById('modal-title').innerText = title;
         document.getElementById('modal-desc').innerText = desc;
@@ -398,13 +885,11 @@
             if (isApproved) {
                 const checkboxes = document.querySelectorAll('.update-cb:checked');
                 const selectedIds = Array.from(checkboxes).map(cb => cb.value);
-
                 if (selectedIds.length === 0) {
                     updateStageUI(3, 'No updates selected', 'completed');
                     finishScan();
                     return;
                 }
-
                 updateStageUI(3, `Installing ${selectedIds.length} update(s)...`, 'active');
                 ipcRenderer.send('resolve-updates', selectedIds); 
             } else {
@@ -439,8 +924,6 @@
 </script>
 
 <script>
-    // 3. GRAB KEY SECURELY
-    // const API_KEY = window.process.argv.find(arg => arg.startsWith('--api-key=')).split('=')[1];
     let API_KEY = "MISSING_KEY";
     try {
         const keyArg = process.argv.find(arg => arg.startsWith('--api-key='));
@@ -452,17 +935,15 @@
     } catch (error) {
         console.error("⚠️ SysMedic Error reading process.argv:", error);
     }
+    
     let workingModelName = null;
     let currentAttachment = null; 
     let conversationHistory = [];
 
-    // --- NESTED GUIDE STACK ---
-    // Index 0 = Main Guide, Index 1 = Sub Guide, etc.
     let guideStack = []; 
     let stepTimer = null;
     let waitingForUserConfirmation = false;
 
-    // --- FILE HANDLING LOGIC ---
     function handleFileSelect(event) {
         const file = event.target.files[0];
         if (!file) return;
@@ -500,7 +981,6 @@
         document.getElementById('preview-area').style.display = 'none';
     }
 
-    // --- UI HELPERS ---
     function handleEnter(e) { if (e.key === 'Enter') sendMessage(); }
 
     function addMessage(text, sender, isLoading = false, attachment = null) {
@@ -534,7 +1014,6 @@
         return msgDiv.id;
     }
 
-    // --- MODEL FINDER ---
     async function getValidModel() {
         if(workingModelName) return workingModelName; 
         try {
@@ -552,43 +1031,29 @@
         } catch(e) { console.error(e); return "models/gemini-1.5-flash"; }
     }
 
-    // --- NESTED GUIDE LOGIC ---
     function startGuide(steps, topic) {
-        // Push new guide to stack
-        guideStack.push({
-            steps: steps,
-            index: 0,
-            topic: topic
-        });
-        
-        // Update UI Look
+        guideStack.push({ steps: steps, index: 0, topic: topic });
         const inputWrapper = document.getElementById('chat-input-wrapper');
         inputWrapper.classList.add('interactive-active');
         if (guideStack.length > 1) {
-            inputWrapper.classList.add('subguide-active'); // Orange border for nested
+            inputWrapper.classList.add('subguide-active'); 
             addMessage(`🔧 **Detour:** Let's fix "${topic}" first, then go back to the main problem.`, 'bot');
         }
-
         showCurrentStep();
     }
 
     function showCurrentStep() {
         if (guideStack.length === 0) return;
-
         const currentGuide = guideStack[guideStack.length - 1]; 
         
-        // Check if finished
         if (currentGuide.index >= currentGuide.steps.length) {
             guideStack.pop(); 
-            
             if (guideStack.length > 0) {
-                // Return to previous guide
                 const parentGuide = guideStack[guideStack.length - 1];
                 document.getElementById('chat-input-wrapper').classList.remove('subguide-active');
                 addMessage(`✅ "${currentGuide.topic}" resolved! Now back to **${parentGuide.topic}** (Step ${parentGuide.index + 1}).`, 'bot');
                 showCurrentStep(); 
             } else {
-                // All guides done
                 addMessage("✅ All steps complete! Is your system fully repaired?", 'bot');
                 document.getElementById('chat-input-wrapper').classList.remove('interactive-active');
                 document.getElementById('chat-input-wrapper').classList.remove('subguide-active');
@@ -598,7 +1063,6 @@
 
         const stepText = `👉 **Step ${currentGuide.index + 1} (${currentGuide.topic}):** ${currentGuide.steps[currentGuide.index]} \n\n(Perform this now. I will ask you in 10s)`;
         addMessage(stepText, 'bot');
-        
         waitingForUserConfirmation = true;
 
         if(stepTimer) clearTimeout(stepTimer);
@@ -609,7 +1073,6 @@
         }, 10000); 
     }
 
-    // --- MAIN SEND FUNCTION ---
     async function sendMessage() {
         const input = document.getElementById('user-input');
         const text = input.value.trim();
@@ -619,10 +1082,9 @@
         addMessage(text, 'user', false, currentAttachment);
         input.value = "";
         
-        // --- INTERACTIVE CONFIRMATION CHECK ---
         if (guideStack.length > 0 && waitingForUserConfirmation) {
             const lower = text.toLowerCase();
-            const yesWords = ['yes', 'done', 'ok', 'completed', 'finished', 'sure'];
+            const yesWords = ['yes', 'done', 'ok', 'completed', 'finished', 'sure', 'found', 'fixed', 'solved'];
             const waitWords = ['no', 'wait', 'hold on', 'not yet', 'pause'];
 
             const isYes = yesWords.some(w => lower.includes(w) && lower.length < 15);
@@ -641,16 +1103,13 @@
                 return;
             }
             else {
-                // DETOUR: User typed something else (a new problem)
                 clearTimeout(stepTimer);
                 addMessage("🔍 I see a sub-issue. Analyzing...", 'bot', true);
             }
         }
 
-        // --- PREPARE PAYLOAD ---
         const fileToSend = currentAttachment;
         clearAttachment();
-
         const loadingId = document.getElementById('msg-' + Date.now()) ? null : addMessage("Thinking...", 'bot', true);
 
         try {
@@ -659,7 +1118,11 @@
             
             let userParts = [];
             
-            // SYSTEM PROMPT (Once)
+            // Limit History to last 8 messages
+            if (conversationHistory.length > 8) {
+                conversationHistory = conversationHistory.slice(conversationHistory.length - 8);
+            }
+
             if (conversationHistory.length === 0) {
                  userParts.push({ text: `
                     You are SysMedic. 
@@ -678,7 +1141,6 @@
                 `});
             }
 
-            // Context: Are we in a guide?
             if (guideStack.length > 0 && waitingForUserConfirmation) {
                  const currentGuide = guideStack[guideStack.length - 1];
                  userParts.push({ text: `[SYSTEM: User is paused on Step ${currentGuide.index+1} of guide "${currentGuide.topic}". They reported:] ` + text });
@@ -700,6 +1162,9 @@
                 body: JSON.stringify({ contents: conversationHistory })
             });
 
+            if (response.status === 429) {
+                throw new Error("You are chatting too fast! Please wait 1 minute to let the AI cool down.");
+            }
             if (!response.ok) throw new Error(response.statusText);
 
             const data = await response.json();
@@ -709,20 +1174,19 @@
 
             if(loadingId && document.getElementById(loadingId)) document.getElementById(loadingId).remove();
             
-            // Remove "snag" bubble if it exists
             const snagBubbles = document.querySelectorAll('.message.bot');
-            const lastBubble = snagBubbles[snagBubbles.length - 1];
-            if(lastBubble.innerText.includes("Analyzing...")) lastBubble.remove();
+            if(snagBubbles.length > 0) {
+                const lastBubble = snagBubbles[snagBubbles.length - 1];
+                if(lastBubble.innerText.includes("Analyzing...")) lastBubble.remove();
+            }
 
-            // --- TRIGGER CHECKS ---
             if (aiText.includes("$$STEPS_START$$")) {
                 const jsonStr = aiText.split("$$STEPS_START$$")[1].split("$$STEPS_END$$")[0];
                 try {
                     const steps = JSON.parse(jsonStr);
-                    // Determine Topic Name
                     let topic = "Repair";
                     if (guideStack.length === 0) topic = "Main Issue";
-                    else topic = "Sub-Issue"; // Simplified naming
+                    else topic = "Sub-Issue"; 
                     
                     addMessage(`🚀 Starting Guide for ${topic}...`, 'bot');
                     startGuide(steps, topic);
@@ -745,6 +1209,114 @@
             console.error("SysMedic AI Error:", error);
             addMessage(`⚠️ Error: ${error.message}`, 'bot');
         }
+    }
+
+    // --- TICKET GENERATION LOGIC ---
+    async function generateSupportTicket() {
+        const btn = document.getElementById('btn-generate-ticket');
+        const outputBox = document.getElementById('ticket-output');
+        const sendBtn = document.getElementById('btn-send-ticket');
+
+        btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Generating AI Summary...';
+        btn.disabled = true;
+
+        try {
+            // 1. Grab System Info directly from UI
+            const sysOS = document.getElementById('dev-os-name') ? document.getElementById('dev-os-name').innerText : 'Windows 11 Pro';
+            const sysCPU = document.getElementById('dev-cpu') ? document.getElementById('dev-cpu').innerText : 'Intel Core i7-13700H';
+            const sysRAM = document.getElementById('ram-val') ? document.getElementById('ram-val').innerText : '16 GB';
+
+            // 2. Grab Chat History (Extracting just the text)
+            let chatLogText = "";
+            if (conversationHistory.length === 0) {
+                chatLogText = "No previous chat history recorded.";
+            } else {
+                conversationHistory.forEach(msg => {
+                    // Skip system prompt at index 0
+                    if (msg.parts[0].text.includes("You are SysMedic")) return; 
+                    const role = msg.role === 'user' ? 'USER' : 'AI';
+                    chatLogText += `[${role}]: ${msg.parts[0].text}\n`;
+                });
+            }
+
+            // 3. Ask AI to summarize
+            const modelName = await getValidModel();
+            const url = `https://generativelanguage.googleapis.com/v1beta/${modelName}:generateContent?key=${API_KEY}`;
+            
+            const prompt = `
+            You are a technical support summarizer. 
+            Create a professional IT support ticket based on the following data.
+            Do NOT use markdown like ** or #. Use plain text formatting.
+            
+            System Info:
+            OS: ${sysOS}
+            CPU: ${sysCPU}
+            RAM: ${sysRAM}
+
+            Recent Chat Log:
+            ${chatLogText}
+
+            Format the output strictly as:
+            TICKET ID: [Generate a random 6 character alphanumeric string]
+            TIMESTAMP: ${new Date().toLocaleString()}
+            
+            USER SYSTEM SPECS:
+            [Insert Specs]
+
+            ISSUE SUMMARY:
+            [1 paragraph summary of the user's problem]
+
+            STEPS ALREADY ATTEMPTED BY AI:
+            [List what the AI told the user to do]
+
+            RECOMMENDED ACTION FOR HUMAN AGENT:
+            [What should the human do next?]
+            `;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: prompt }] }] })
+            });
+
+            if (!response.ok) throw new Error("API Limit reached. Please wait a minute.");
+
+            const data = await response.json();
+            const ticketText = data.candidates[0].content.parts[0].text;
+
+            // Display the ticket
+            outputBox.innerText = ticketText;
+            outputBox.classList.remove('hidden');
+            sendBtn.classList.remove('hidden');
+
+            btn.innerHTML = '<i class="fa-solid fa-rotate-right"></i> Regenerate Ticket';
+            btn.disabled = false;
+
+        } catch (error) {
+            btn.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Generate Ticket Summary';
+            btn.disabled = false;
+            alert("Failed to generate ticket: " + error.message);
+        }
+    }
+
+    function sendSupportTicket() {
+        const sendBtn = document.getElementById('btn-send-ticket');
+        sendBtn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Sending via API...';
+        sendBtn.disabled = true;
+
+        // Simulate sending to Developer B's backend
+        setTimeout(() => {
+            sendBtn.innerHTML = '<i class="fa-solid fa-check"></i> Ticket Sent Successfully!';
+            sendBtn.style.background = "#059669";
+            setTimeout(() => {
+                sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> Send Ticket to Agent';
+                sendBtn.style.background = "";
+                sendBtn.disabled = false;
+                document.getElementById('ticket-output').classList.add('hidden');
+                sendBtn.classList.add('hidden');
+                document.getElementById('btn-generate-ticket').innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Generate Ticket Summary';
+            }, 3000);
+        }, 1500);
     }
 </script>
 
